@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="gossipLearning">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/bin/gossipLearning.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

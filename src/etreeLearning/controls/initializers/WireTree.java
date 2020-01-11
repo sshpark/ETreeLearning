@@ -1,4 +1,4 @@
-package etreeLearning.init;
+package etreeLearning.controls.initializers;
 
 import etreeLearning.node.TreeNode;
 import peersim.config.Configuration;

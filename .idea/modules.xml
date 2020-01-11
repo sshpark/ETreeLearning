@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Gossip-Learning-Framework.iml" filepath="$PROJECT_DIR$/Gossip-Learning-Framework.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ETreeLearning.iml" filepath="$PROJECT_DIR$/ETreeLearning.iml" />
     </modules>
   </component>
 </project>
