@@ -1,10 +1,13 @@
 C 20
-NETWORKSIZE 10
+NETWORKSIZE 3
 ONLINESIZE NETWORKSIZE
 
 CYCLE C*ONLINESIZE+1
 LOGTIME ONLINESIZE
 SEED 1000000007
+
+DELAY_MEAN 5
+DELAY_VAR 3
 
 # Transport parameters
 DROP 0.0
@@ -13,12 +16,12 @@ MAXDELAY ONLINESIZE*1.1
 
 # Overlay parameters
 NEWSCAST_CACHESIZE 5
-NEWSCAST_FREQ ONLINESIZE/10.0
+NEWSCAST_FREQ ONLINESIZE
 
 # Learner parameters
 CAPACITY 1
-DELAY_MEAN ONLINESIZE
-DELAY_VAR ONLINESIZE/10.0
+DELAY_MEAN 2
+DELAY_VAR 0
 
 
 #-------------------- General Simulation Properties --------------------
@@ -31,8 +34,8 @@ random.seed SEED
 
 #-------------------- Transport layer --------------------
 protocol.transport UniformRandomTransport
-protocol.transport.mindelay MINDELAY
-protocol.transport.maxdelay MAXDELAY
+protocol.transport.mindelay 11
+protocol.transport.maxdelay 11
 
 
 #-------------------- Connection layer --------------------
@@ -44,6 +47,11 @@ protocol.overlay.baseFreq NEWSCAST_FREQ
 
 #-------------------- Learning layer(s) --------------------
 protocol.learningProtocol etreeLearning.protocol.ETreeLearningProtocol
+protocol.learningProtocol.linkable overlay
+protocol.learningProtocol.transport transport
+protocol.learningProtocol.delayMean DELAY_MEAN
+protocol.learningProtocol.delayVar DELAY_VAR
+
 
 #-------------------- Initializers --------------------
 init.instanceLoader gossipLearning.controls.initializers.InstanceLoader
@@ -52,14 +60,14 @@ init.instanceLoader.trainingFile res/db/spambase_train.dat
 init.instanceLoader.evaluationFile res/db/spambase_eval.dat
 init.instanceLoader.samplesPerNode 1
 
-init.wire etreeLearning.controls.initializers.WireTree
-init.wire.low 1
-init.wire.high 3
-init.wire.protocol overlay
+init.overlayInit WireKOut
+init.overlayInit.k NEWSCAST_CACHESIZE
+init.overlayInit.protocol overlay
+init.overlayInit.protocol overlay
 
 init.learningProtocolStart gossipLearning.controls.initializers.StartMessageInitializer
 init.learningProtocolStart.protocol learningProtocol
 init.learningProtocolStart.delay 10
 
 #-------------------- Define Init Sequence --------------------
-include.init wire instanceLoader learningProtocolStart
+include.init overlayInit instanceLoader learningProtocolStart

@@ -61,6 +61,7 @@ public class WireTree extends WireGraph {
                 int index = rd.nextInt(len);
 
                 graph.setEdge(top, (int)tree.get(index) );
+                graph.setEdge((int)tree.get(index), top );
                 q.push( tree.get(index) );
                 tree.remove( index );
                 len--;
@@ -68,10 +69,10 @@ public class WireTree extends WireGraph {
             }
         }
 
-        for (int i = 0; i < n; i++) {
-            Collection temp = graph.getNeighbours(i);
-            System.out.println(i + ": " + temp);
-        }
+//        for (int i = 0; i < n; i++) {
+//            Collection temp = graph.getNeighbours(i);
+//            System.out.println(i + ": " + temp);
+//        }
 
     }
 }

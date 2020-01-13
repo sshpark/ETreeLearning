@@ -10,6 +10,7 @@ import peersim.core.Node;
 
 public class ETreeLearningProtocol extends AbstractProtocol {
     public ETreeLearningProtocol(String prefix) {
+        super.init(prefix);
     }
 
     @Override
@@ -19,15 +20,19 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
     @Override
     public void activeThread() {
-        System.out.println(CommonState.getNode().getID() + " sayed: I am actived at time of " + CommonState.getTime());
+        Node dest = getOverlay().getNeighbor( 0 );
+        double value =  CommonState.r.nextGaussian();
+        System.out.print("Seding!!! "+CommonState.getNode().getID() + " -> " + dest.getID()
+                + " sayed: I am actived at time of " + CommonState.getTime() +
+                ", value=" + value + "then delay is ");
 
-        sendTo(new EModelMessage(currentNode, CommonState.r.nextGaussian()),
-                getOverlay().getNeighbor(0));
+        sendTo(new EModelMessage(currentNode, value), dest);
     }
 
     @Override
     public void passiveThread(ModelMessage message) {
-
+        System.out.println("Receiving!!! "+currentNode.getID() + ", I am receving message from " + ((EModelMessage)message).src.getID()
+        + ":" + CommonState.getTime() + ", " + ((EModelMessage)message).value);
     }
 
     @Override

@@ -2,12 +2,15 @@
   <library name="lib">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/djep-1.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/colt-1.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jep-2.3.0.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/peersim-1.0.5.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/peersim-extras.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/jep-2.3.0.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/colt-1.2.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="file://$USER_HOME$/Downloads/code/src" />
+      <root url="file://$USER_HOME$/Downloads/peersim-1.0.5/src" />
+    </SOURCES>
   </library>
 </component>
