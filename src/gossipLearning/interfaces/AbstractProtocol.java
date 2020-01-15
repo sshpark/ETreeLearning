@@ -149,6 +149,7 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
         int delay = (int)(delayMean + CommonState.r.nextGaussian()*delayVar);
         delay = (delay > 0) ? delay : 1;
         System.out.println(delay);
+        // Next time of the active thread
         EDSimulator.add(delay, new OnlineSessionFollowerActiveThreadMessage(sessionID), currentNode, currentProtocolID);
       }
     } else if (messageObj instanceof ModelMessage) {

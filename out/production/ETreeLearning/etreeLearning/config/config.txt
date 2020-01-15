@@ -34,8 +34,8 @@ random.seed SEED
 
 #-------------------- Transport layer --------------------
 protocol.transport UniformRandomTransport
-protocol.transport.mindelay 11
-protocol.transport.maxdelay 11
+protocol.transport.mindelay 10
+protocol.transport.maxdelay 10
 
 
 #-------------------- Connection layer --------------------

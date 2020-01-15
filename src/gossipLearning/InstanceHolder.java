@@ -13,7 +13,7 @@ import java.util.Vector;
 
 /**
  * This class stores instances and the corresponding class labels in Vector containers. 
- * An instance is represented as a SparseVector and the class label is as a double value. 
+ * An instance is represented as a SparseVector and s a doublthe class label is ae value.
  * 
  * @author István Hegedűs
  *

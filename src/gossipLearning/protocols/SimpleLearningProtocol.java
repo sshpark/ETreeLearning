@@ -178,7 +178,7 @@ public class SimpleLearningProtocol extends AbstractProtocol {
   /**
    * It overwrites the stored ModelHolder with the received one.
    * 
-   *  @param New ModelHolder instance
+   *  @param modelHolder ModelHolder instance
    *  @return true The process is always considered successful.
    */
   @Override
@@ -190,7 +190,7 @@ public class SimpleLearningProtocol extends AbstractProtocol {
   /**
    * It returns the stored ModelHolder and sets the current one to <i>null</i>.
    *
-   * @param It has to be 0.
+   * @param index has to be 0.
    * @return ModelHolder instance which was stored by the node.
    */
   @Override
