@@ -1,0 +1,71 @@
+C 20
+NETWORKSIZE 3
+ONLINESIZE NETWORKSIZE
+
+CYCLE C*ONLINESIZE+1
+LOGTIME ONLINESIZE
+SEED 1000000007
+
+DELAY_MEAN 5
+DELAY_VAR 3
+
+# Transport parameters
+DROP 0.0
+MINDELAY ONLINESIZE*0.9
+MAXDELAY ONLINESIZE*1.1
+
+# Overlay parameters
+NEWSCAST_CACHESIZE 5
+NEWSCAST_FREQ ONLINESIZE
+
+# Learner parameters
+CAPACITY 1
+DELAY_MEAN 2
+DELAY_VAR 0
+
+
+#-------------------- General Simulation Properties --------------------
+network.size NETWORKSIZE
+network.node etreeLearning.node.TreeNode
+simulation.endtime CYCLE
+simulation.logtime LOGTIME
+random.seed SEED
+
+
+#-------------------- Transport layer --------------------
+protocol.transport UniformRandomTransport
+protocol.transport.mindelay 10
+protocol.transport.maxdelay 10
+
+
+#-------------------- Connection layer --------------------
+protocol.overlay peersim.extras.mj.ednewscast.EdNewscast
+protocol.overlay.transport transport
+protocol.overlay.cache NEWSCAST_CACHESIZE
+protocol.overlay.baseFreq NEWSCAST_FREQ
+
+
+#-------------------- Learning layer(s) --------------------
+protocol.learningProtocol etreeLearning.protocol.ETreeLearningProtocol
+protocol.learningProtocol.linkable overlay
+protocol.learningProtocol.transport transport
+protocol.learningProtocol.delayMean DELAY_MEAN
+protocol.learningProtocol.delayVar DELAY_VAR
+ -------------- Initializers --------------------
+init.instanceLoader learning.controls.initializers.InstanceLoader
+init.instanceLoader.protocol learningProtocol
+init.instanceLoader.trainingFile res/db/spambase_train.dat
+init.instanceLoader.evaluationFile res/db/spambase_eval.dat
+init.instanceLoader.samplesPerNode 1
+
+init.overlayInit WireKOut
+init.overlayInit.k NEWSCAST_CACHESIZE
+init.overlayInit.protocol overlay
+init.overlayInit.protocol overlay
+
+init.learningProtocolStart learning.controls.initializers.StartMessageInitializer
+init.learningProtocolStart.protocol learningProtocol
+init.learningProtocolStart.delay 10
+
+#-------------------- Define Init Sequence --------------------
+include.init overlayInit instanceLoader learningProtocolStart

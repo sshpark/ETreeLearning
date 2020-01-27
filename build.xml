@@ -16,7 +16,7 @@
   <property name="res" location="res"/>
   
   <property name="projectName" value="GossipLearningFramework"/>
-  <property name="jarName" value="gossipLearning.jar"/>
+  <property name="jarName" value="learning.jar"/>
   
   <!-- Environment property must be set for using environment variables -->
   <property environment="env"/>

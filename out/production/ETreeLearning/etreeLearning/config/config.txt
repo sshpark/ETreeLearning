@@ -51,9 +51,7 @@ protocol.learningProtocol.linkable overlay
 protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
-
-
-#-------------------- Initializers --------------------
+ -------------- Initializers --------------------
 init.instanceLoader gossipLearning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
 init.instanceLoader.trainingFile res/db/spambase_train.dat

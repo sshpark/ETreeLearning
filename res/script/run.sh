@@ -16,8 +16,8 @@ export mem="1G"
 export dir=`dirname $0`
 export basedir="${dir}/../.."
 export cpdelim=`java -help 2>&1 | grep -A 1 "classpath" | tail -n 1 | awk '{print $2}'`
-#export cp=`${findCmd} ${basedir}/lib/ -name "*.jar" | awk -v basedir=${basedir} -v cpdelim=${cpdelim} '{printf("%s%s;",$1,cpdelim);}END{print basedir "/bin/gossipLearning.jar"}'`
-export cp="res/script/../../lib/build/junit-4.9b2.jar;res/script/../../lib/build/UmlGraph-5.4.jar;res/script/../../lib/colt-1.2.0.jar;res/script/../../lib/djep-1.0.0.jar;res/script/../../lib/jep-2.3.0.jar;res/script/../../lib/peersim-1.0.5.jar;res/script/../../lib/peersim-extras.jar;res/script/../../bin/gossipLearning.jar"
+#export cp=`${findCmd} ${basedir}/lib/ -name "*.jar" | awk -v basedir=${basedir} -v cpdelim=${cpdelim} '{printf("%s%s;",$1,cpdelim);}END{print basedir "/bin/learning.jar"}'`
+export cp="res/script/../../lib/build/junit-4.9b2.jar;res/script/../../lib/build/UmlGraph-5.4.jar;res/script/../../lib/colt-1.2.0.jar;res/script/../../lib/djep-1.0.0.jar;res/script/../../lib/jep-2.3.0.jar;res/script/../../lib/peersim-1.0.5.jar;res/script/../../lib/peersim-extras.jar;res/script/../../bin/learning.jar"
 
 if [ -s "${trainingFile}" -a -s "$evaluationFile" -a -s "$config_template" ]; then
   # generate config

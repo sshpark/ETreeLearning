@@ -34,7 +34,7 @@ or as [tar.gz archive](https://github.com/RobertOrmandi/Gossip-Learning-Framewor
 
 * __building it__: The building process is supported with *ant*. To create a jar you have
 to type `ant` in the root directory of the
-project. This will produce *gossipLearning.jar* in the *bin*
+project. This will produce *learning.jar* in the *bin*
 directory of the project. (All of the libraries which are necessary for
 building or running the project are included in the *lib* directory of
 the project.)

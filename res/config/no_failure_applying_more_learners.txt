@@ -42,14 +42,14 @@ protocol.overlay.baseFreq NEWSCAST_FREQ
 
 
 #-------------------- Learning layer(s) --------------------
-protocol.learningProtocol gossipLearning.protocols.MultipleLearningProtocol
+protocol.learningProtocol learning.protocols.MultipleLearningProtocol
 protocol.learningProtocol.linkable overlay
 protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
-protocol.learningProtocol.modelHolderName gossipLearning.modelHolders.BoundedModelHolder
+protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
-protocol.learningProtocol.modelNames gossipLearning.models.P2Pegasos,gossipLearning.models.MergeablePegasos,gossipLearning.models.LogisticRegression,gossipLearning.models.MergeableLogisticRegression,gossipLearning.models.AdalinePerceptron
+protocol.learningProtocol.modelNames learning.models.P2Pegasos,learning.models.MergeablePegasos,learning.models.LogisticRegression,learning.models.MergeableLogisticRegression,learning.models.AdalinePerceptron
 
 protocol.learningProtocol.P2Pegasos.lambda 0.0001
 protocol.learningProtocol.MergeablePegasos.lambda 0.0001
@@ -71,16 +71,16 @@ init.overlayInit.protocol overlay
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
 init.overlayStart.protocolID overlay
 
-init.instanceLoader gossipLearning.controls.initializers.InstanceLoader
+init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
 init.instanceLoader.trainingFile ${TRAINING_DATABASE}
 init.instanceLoader.evaluationFile ${EVALUATION_DATABASE}
 init.instanceLoader.samplesPerNode 1
 
-init.setNumberOfClassesForModels gossipLearning.controls.initializers.SetNumberOfClassesForModels
+init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
 
-init.learningProtocolStart gossipLearning.controls.initializers.StartMessageInitializer
+init.learningProtocolStart learning.controls.initializers.StartMessageInitializer
 init.learningProtocolStart.protocol learningProtocol
 init.learningProtocolStart.delay 0
 
@@ -90,9 +90,9 @@ include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels
 
 
 #-------------------- Observers --------------------
-control.prediction gossipLearning.controls.observers.PredictionObserver
-control.prediction.errorComputatorClass gossipLearning.controls.observers.errorComputation.VotedErrorComputator
-control.prediction.errorFunctionClass gossipLearning.controls.observers.errorComputation.ZeroOneError
+control.prediction learning.controls.observers.PredictionObserver
+control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
+control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
 control.prediction.step LOGTIME
 control.prediction.protocol learningProtocol
 control.prediction.format gpt
