@@ -98,6 +98,12 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
     return distribution;
   }
 
+  public void merge(LogisticRegression model) {
+    this.w = this.w.add(model.w).mul(0.5);
+    this.bias = (this.bias+model.bias) / 2.0;
+    this.age = Math.max(this.age, model.age);
+  }
+
   @Override
   public double computeSimilarity(LogisticRegression model) {
     return w.cosSim(model.w);

@@ -64,6 +64,7 @@ public class PredictionObserver extends GraphObserver {
   @SuppressWarnings("unchecked")
   public PredictionObserver(String prefix) throws Exception {
     super(prefix);
+    System.err.println("I am initialized!!!");
     pid = Configuration.getPid(prefix + "." + PAR_PROT);
     format = Configuration.getString(prefix + "." + PAR_FORMAT, "");
     printSuffix = Configuration.getString(prefix + "." + PAR_SUFFIX, "");

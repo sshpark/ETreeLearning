@@ -49,7 +49,7 @@ public class InstanceLoader implements Control {
     tFile = new File(Configuration.getString(prefix + "." + PAR_TFILE));
     eFile = new File(Configuration.getString(prefix + "." + PAR_EFILE));
     samplesPerNode = Configuration.getInt(prefix + "." + PAR_SIZE, 1);
-    readerClassName = Configuration.getString(prefix + "." + PAR_READERCLASS, "gossipLearning.DataBaseReader");
+    readerClassName = Configuration.getString(prefix + "." + PAR_READERCLASS, "learning.DataBaseReader");
     observers = new Vector<PredictionObserver>();
   }
   

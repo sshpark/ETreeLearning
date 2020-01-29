@@ -40,7 +40,7 @@ protocol.overlay.baseFreq NEWSCAST_FREQ
 
 
 #-------------------- Learning layer(s) --------------------
-protocol.learningProtocol learning.protocols.GossipLearningProtocol
+protocol.learningProtocol learning.protocols.SimpleLearningProtocol
 protocol.learningProtocol.linkable overlay
 protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
@@ -96,6 +96,6 @@ control.prediction.protocol learningProtocol
 control.prediction.format gpt
 
 control_communication.i2p desc
-control_communication.i2p.on init.instanceLoader
+control_communication.i2p.on init.instanceHolder
 control_communication.i2p.method setPredictionObserver
 control_communication.i2p.param control.prediction

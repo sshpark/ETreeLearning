@@ -27,7 +27,6 @@ public class VotedErrorComputator extends AbstractErrorComputator {
   public double[] computeError(ModelHolder modelHolder) {
     double[] errors = new double[modelHolder.size()];
     double[] meanOfPredictions = new double[eval.size()];
-    
     // compute errors
     for (int modelIdx = modelHolder.size() - 1, errorIdx = 0; errorIdx < errors.length; modelIdx --, errorIdx ++) {
       if (modelIdx >= 0) {
