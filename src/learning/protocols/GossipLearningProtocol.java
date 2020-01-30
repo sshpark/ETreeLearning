@@ -6,6 +6,7 @@ import learning.interfaces.ModelHolder;
 import learning.messages.ModelMessage;
 import learning.modelHolders.BoundedModelHolder;
 import learning.models.LogisticRegression;
+import learning.models.MergeableLogisticRegression;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -92,11 +93,12 @@ public class GossipLearningProtocol extends AbstractProtocol {
         receivedModels.add(message.getModel(0));
 
         if (time - lastAggregatedTime < deltaG) return;
+        lastAggregatedTime = time;
 
         // merge
         for (int incommingModelID = 0; receivedModels != null && incommingModelID < receivedModels.size(); incommingModelID++) {
-            LogisticRegression model = (LogisticRegression) receivedModels.getModel(incommingModelID);
-            ((LogisticRegression) workerModel).merge(model);
+            MergeableLogisticRegression model = (MergeableLogisticRegression) receivedModels.getModel(incommingModelID);
+            workerModel = ((MergeableLogisticRegression) workerModel).merge(model);
         }
         receivedModels.clear();
 
@@ -109,28 +111,75 @@ public class GossipLearningProtocol extends AbstractProtocol {
         }
     }
 
+    /**
+     * The size is always 0 or 1 meaning that we have only zero or one ModelHolder instance.
+     *
+     * @return The protocol handles only zero or one ModelHolder instance.
+     */
     @Override
     public int size() {
-        return 0;
+        return (receivedModels == null) ? 0 : 1;
     }
 
+    /**
+     * It returns the only one stored ModelHolder instance if the index is 0,
+     * otherwise throws an exception.
+     *
+     * @param index Index which always has to be 0.
+     * @return The stored ModelHolder instance.
+     */
     @Override
     public ModelHolder getModelHolder(int index) {
-        return null;
+        if (index != 0) {
+            throw new RuntimeException(getClass().getCanonicalName() + " can handle only one modelHolder with index 0.");
+        }
+        return receivedModels;
     }
 
+    /**
+     * It simply replaces the stored ModelHolder instance.
+     *
+     * @param index Index which has to be 0.
+     * @param modelHolder The new model holder.
+     */
     @Override
     public void setModelHolder(int index, ModelHolder modelHolder) {
-
+        if (index != 0) {
+            throw new RuntimeException(getClass().getCanonicalName() + " can handle only one modelHolder with index 0.");
+        }
+        this.receivedModels = modelHolder;
     }
 
+    /**
+     * It overwrites the stored ModelHolder with the received one.
+     *
+     *  @param modelHolder ModelHolder instance
+     *  @return true The process is always considered successful.
+     */
     @Override
     public boolean add(ModelHolder modelHolder) {
-        return false;
+        setModelHolder(0, modelHolder);
+        return true;
+    }
+
+    /**
+     * It returns the stored ModelHolder and sets the current one to <i>null</i>.
+     *
+     * @param index has to be 0.
+     * @return ModelHolder instance which was stored by the node.
+     */
+    @Override
+    public ModelHolder remove(int index) {
+        if (index != 0) {
+            throw new RuntimeException(getClass().getCanonicalName() + " can handle only one modelHolder with index 0.");
+        }
+        ModelHolder ret = receivedModels;
+        receivedModels = null;
+        return ret;
     }
 
     @Override
-    public ModelHolder remove(int index) {
-        return null;
+    public Model getWorkerModel() {
+        return workerModel;
     }
 }

@@ -19,7 +19,13 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
    * The learning parameter is 0.0001 by default.
    */
   protected static final String PAR_LAMBDA = "LogisticRegression.lambda";
-  protected double lambda = 0.0001;
+  protected double lambda = 0.000001;
+
+  /**
+   * The learning parameter is 0.0001 by default.
+   */
+  protected static final String PAR_ALPHA = "LogisticRegression.alpha";
+  protected double alpha = 10000;
   
   /** @hidden */
   protected SparseVector w;
@@ -75,7 +81,7 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
     w.mul(1.0 - nu * lambda);
     w.add(instance, - nu * err);
     bias -= nu * err;
-    
+
   }
   
   /**
@@ -96,12 +102,6 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
     distribution[1] = getPositiveProbability(instance);
     distribution[0] = 1.0 - distribution[1];
     return distribution;
-  }
-
-  public void merge(LogisticRegression model) {
-    this.w = this.w.add(model.w).mul(0.5);
-    this.bias = (this.bias+model.bias) / 2.0;
-    this.age = Math.max(this.age, model.age);
   }
 
   @Override

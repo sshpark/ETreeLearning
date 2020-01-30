@@ -202,4 +202,9 @@ public class SimpleLearningProtocol extends AbstractProtocol {
     models = null;
     return ret;
   }
+
+  @Override
+  public Model getWorkerModel() {
+    return null;
+  }
 }

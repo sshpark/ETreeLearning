@@ -1,7 +1,7 @@
-NETWORKSIZE 10
+NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
 
-LOGTIME ONLINESIZE
+LOGTIME 6 * 1000
 SEED 1234567890
 
 # Transport parameters
@@ -14,15 +14,16 @@ NEWSCAST_CACHESIZE 5
 NEWSCAST_FREQ ONLINESIZE/10.0
 
 # Learner parameters
-CAPACITY 1
+CAPACITY NETWORKSIZE
 DELAY_MEAN 1000
 DELAY_VAR 0
+DELTAG 1000
 
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime 60 * 1000
-simulation.logtime 6 * 1000
+simulation.endtime 720 * 1000
+simulation.logtime LOGTIME
 random.seed SEED
 
 
@@ -45,21 +46,12 @@ protocol.learningProtocol.linkable overlay
 protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
+protocol.learningProtocol.deltaG DELTAG
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
-protocol.learningProtocol.modelNames learning.models.P2Pegasos,learning.models.MergeablePegasos,learning.models.LogisticRegression,learning.models.MergeableLogisticRegression,learning.models.AdalinePerceptron
+protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 
-protocol.learningProtocol.P2Pegasos.lambda 0.0001
-protocol.learningProtocol.MergeablePegasos.lambda 0.0001
-protocol.learningProtocol.LogisticRegression.lambda 0.01
 protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
-protocol.learningProtocol.LinearRegression.lambda 0.01
-protocol.learningProtocol.AdalinePerceptron.lambda 10.0
-protocol.learningProtocol.MultiLogReg.lambda 0.01
-protocol.learningProtocol.MergeableMultiLogReg.lambda 0.01
-protocol.learningProtocol.P2Winnow.eta 1.0
-protocol.learningProtocol.P2Winnow.theta 0.5
-
 
 #-------------------- Initializers --------------------
 init.overlayInit WireKOut
@@ -88,7 +80,7 @@ include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels
 
 
 #-------------------- Observers --------------------
-control.prediction learning.controls.observers.PredictionObserver
+control.prediction learning.controls.observers.LossObserver
 control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
 control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
 control.prediction.step LOGTIME

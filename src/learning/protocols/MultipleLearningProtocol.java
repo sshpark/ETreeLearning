@@ -199,5 +199,8 @@ public class MultipleLearningProtocol extends AbstractProtocol {
     return null;
   }
 
-  
+  @Override
+  public Model getWorkerModel() {
+    return null;
+  }
 }

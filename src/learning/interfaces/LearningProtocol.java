@@ -40,5 +40,8 @@ public interface LearningProtocol {
   public void setModelHolder(int index, ModelHolder modelHolder);
   public boolean add(ModelHolder modelHolder);
   public ModelHolder remove(int index);
+
+  // get worker model
+  public Model getWorkerModel();
 }
 
