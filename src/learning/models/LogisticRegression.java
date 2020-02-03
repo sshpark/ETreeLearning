@@ -20,12 +20,6 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
    */
   protected static final String PAR_LAMBDA = "LogisticRegression.lambda";
   protected double lambda = 0.000001;
-
-  /**
-   * The learning parameter is 0.0001 by default.
-   */
-  protected static final String PAR_ALPHA = "LogisticRegression.alpha";
-  protected double alpha = 10000;
   
   /** @hidden */
   protected SparseVector w;

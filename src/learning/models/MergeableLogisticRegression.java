@@ -30,7 +30,7 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
 
     public void init(String prefix) {
         super.init(prefix);
-        lambda = Configuration.getDouble(prefix + "." + PAR_LAMBDA, 0.0001);
+        lambda = Configuration.getDouble(prefix + "." + PAR_LAMBDA, 0.01);
     }
 
     @Override

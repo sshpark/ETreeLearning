@@ -1,7 +1,7 @@
-NETWORKSIZE 100
+NETWORKSIZE 1000
 ONLINESIZE NETWORKSIZE
 
-LOGTIME 6 * 1000
+LOGTIME 1000
 SEED 1234567890
 
 # Transport parameters
@@ -10,19 +10,19 @@ MINDELAY 1000
 MAXDELAY 1000
 
 # Overlay parameters
-NEWSCAST_CACHESIZE 5
+NEWSCAST_CACHESIZE NETWORKSIZE/10.0
 NEWSCAST_FREQ ONLINESIZE/10.0
 
 # Learner parameters
 CAPACITY NETWORKSIZE
-DELAY_MEAN 1000
+DELAY_MEAN 1001
 DELAY_VAR 0
 DELTAG 1000
 
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime 720 * 1000
+simulation.endtime 360 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -65,12 +65,12 @@ init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
 init.instanceLoader.trainingFile res/db/spambase_train.dat
 init.instanceLoader.evaluationFile res/db/spambase_eval.dat
-init.instanceLoader.samplesPerNode 41
+init.instanceLoader.samplesPerNode 4
 
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
 
-init.learningProtocolStart learning.controls.initializers.StartMessageInitializer
+init.learningProtocolStart learning.controls.initializers.StartGossipMessageInitializer
 init.learningProtocolStart.protocol learningProtocol
 init.learningProtocolStart.delay 0
 

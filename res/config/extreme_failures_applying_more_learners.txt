@@ -89,7 +89,7 @@ init.instanceLoader.samplesPerNode 1
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
 
-init.learningProtocolStart learning.controls.initializers.StartMessageInitializer
+init.learningProtocolStart learning.controls.initializers.StartGossipMessageInitializer
 init.learningProtocolStart.protocol learningProtocol
 init.learningProtocolStart.delay 0
 

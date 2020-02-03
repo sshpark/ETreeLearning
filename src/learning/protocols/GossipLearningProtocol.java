@@ -5,20 +5,18 @@ import learning.interfaces.Model;
 import learning.interfaces.ModelHolder;
 import learning.messages.ModelMessage;
 import learning.modelHolders.BoundedModelHolder;
-import learning.models.LogisticRegression;
 import learning.models.MergeableLogisticRegression;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 
 /**
  * @author sshpark
  * @date 27/1/2020
  */
 public class GossipLearningProtocol extends AbstractProtocol {
-    private static final String PAR_MODELHOLDERNAME = "modelHolderName";
-    private static final String PAR_MODELNAME = "modelName";
-    private final String PAR_DELTA = "deltaG";
+    private final static String PAR_MODELHOLDERNAME = "modelHolderName";
+    private final static String PAR_MODELNAME = "modelName";
+    private final static String PAR_DELTAG = "deltaG";
 
     /** @hidden */
     private final String modelHolderName;
@@ -29,12 +27,11 @@ public class GossipLearningProtocol extends AbstractProtocol {
 
     private Model workerModel;
     private ModelHolder receivedModels;
-    private long lastAggregatedTime;
 
     public GossipLearningProtocol(String prefix) {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
         modelName = Configuration.getString(prefix + "." + PAR_MODELNAME);
-        deltaG = Configuration.getLong(prefix + "." + PAR_DELTA);
+        deltaG = Configuration.getLong(prefix + "." + PAR_DELTAG);
         init(prefix);
     }
 
@@ -65,8 +62,6 @@ public class GossipLearningProtocol extends AbstractProtocol {
 
             workerModel = (Model)Class.forName(modelName).getConstructor().newInstance();
             workerModel.init(prefix);
-
-            lastAggregatedTime = 0;
         } catch (Exception e) {
             throw new RuntimeException("Exception occured in initialization of " + getClass().getCanonicalName() + ": " + e);
         }
@@ -80,27 +75,18 @@ public class GossipLearningProtocol extends AbstractProtocol {
 
     @Override
     public void activeThread() {
-        if (workerModel != null) {
-            ModelHolder latestModelHolder = new BoundedModelHolder(1);
-            latestModelHolder.add(workerModel);
-            sendToRandomNeighbor(new ModelMessage(currentNode, latestModelHolder));
-        }
+        ModelHolder latestModelHolder = new BoundedModelHolder(1);
+        latestModelHolder.add(workerModel);
+        sendToRandomNeighbor(new ModelMessage(currentNode, latestModelHolder));
+
     }
 
     @Override
     public void passiveThread(ModelMessage message) {
-        long time = CommonState.getTime();
-        receivedModels.add(message.getModel(0));
-
-        if (time - lastAggregatedTime < deltaG) return;
-        lastAggregatedTime = time;
+        MergeableLogisticRegression model = (MergeableLogisticRegression) message.getModel(0);
 
         // merge
-        for (int incommingModelID = 0; receivedModels != null && incommingModelID < receivedModels.size(); incommingModelID++) {
-            MergeableLogisticRegression model = (MergeableLogisticRegression) receivedModels.getModel(incommingModelID);
-            workerModel = ((MergeableLogisticRegression) workerModel).merge(model);
-        }
-        receivedModels.clear();
+        workerModel = ((MergeableLogisticRegression) workerModel).merge(model);
 
         // update
         for (int sampleID = 0; instances != null && sampleID < instances.size(); sampleID++) {

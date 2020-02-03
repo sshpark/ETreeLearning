@@ -13,13 +13,13 @@ import peersim.edsim.EDSimulator;
  * @author István Hegedűs
  *
  */
-public class StartMessageInitializer implements Control {
+public class StartGossipMessageInitializer implements Control {
   private static final String PAR_PROT = "protocol";
   private final int pid;
   private static final String PAR_DELAY = "delay";
   private final int delay;
   
-  public StartMessageInitializer(String prefix) {
+  public StartGossipMessageInitializer(String prefix) {
     pid = Configuration.getPid(prefix + "." + PAR_PROT);
     delay = Configuration.getInt(prefix + "." + PAR_DELAY, 0);
   }

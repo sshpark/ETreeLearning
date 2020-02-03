@@ -17,6 +17,8 @@
  */
 package learning.main;
 import java.io.*;
+import java.util.Vector;
+
 import peersim.cdsim.*;
 import peersim.config.*;
 import peersim.core.*;
@@ -175,9 +177,39 @@ public class Main {
             System.err.println(e+"");
             System.exit(1);
         }
+
+        exportToTXT();
+
         // undocumented testing capabilities
         if(Configuration.contains("__t"))
             System.out.println(System.currentTimeMillis()-time);
         if(Configuration.contains("__x")) Network.test();
     }
+
+    /**
+     * export loss to txt
+     */
+    private static Vector<Double> losses = new Vector<Double>();
+    private static Vector<Long> realTimes = new Vector<Long>();
+
+    public static void addLoss(Long time, double loss) {
+        realTimes.add(time);
+        losses.add(loss);
+    }
+
+    private static void exportToTXT() {
+        try {
+            FileWriter fileWriter = new FileWriter(
+                    "/Users/huangjiaming/Documents/developer/ETreeLearning" +
+                            "/res/losses/gossip_1000.txt");
+            for (int i = 0; i < losses.size(); i++) {
+                fileWriter.write(realTimes.get(i) + " " + losses.get(i) +"\n");
+            }
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

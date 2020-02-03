@@ -11,6 +11,7 @@
     <SOURCES>
       <root url="file://$USER_HOME$/Downloads/code/src" />
       <root url="file://$USER_HOME$/Downloads/peersim-1.0.5/src" />
+      <root url="jar://$PROJECT_DIR$/lib/peersim-extras.jar!/" />
     </SOURCES>
   </library>
 </component>

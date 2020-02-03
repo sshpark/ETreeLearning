@@ -1,8 +1,11 @@
 package learning.controls.observers;
 
 import learning.interfaces.LearningProtocol;
+import learning.main.Main;
 import learning.models.LogisticRegression;
 import learning.utils.SparseVector;
+import peersim.Simulator;
+import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.core.Protocol;
@@ -37,6 +40,7 @@ public class LossObserver extends PredictionObserver {
             }
         }
         errs = errs / (eval.size() * Network.size());
+        Main.addLoss(CommonState.getTime(), errs);
         System.err.println("0-1 error: " + errs);
         return false;
     }

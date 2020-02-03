@@ -1,29 +1,28 @@
-C ${ITERATIONS}
-NETWORKSIZE ${NETWORK_SIZE}
+NETWORKSIZE 1000
 ONLINESIZE NETWORKSIZE
 
-CYCLE C*ONLINESIZE+1
-LOGTIME ONLINESIZE
+LOGTIME 2000
 SEED 1234567890
 
 # Transport parameters
 DROP 0.0
-MINDELAY ONLINESIZE*0.9
-MAXDELAY ONLINESIZE*1.1
+MINDELAY 1000
+MAXDELAY 1000
 
 # Overlay parameters
-NEWSCAST_CACHESIZE 5
-NEWSCAST_FREQ ONLINESIZE/10.0
+NEWSCAST_CACHESIZE NETWORKSIZE/10.0
+NEWSCAST_FREQ NETWORKSIZE/10.0
 
 # Learner parameters
-CAPACITY 10
-DELAY_MEAN ONLINESIZE
-DELAY_VAR ONLINESIZE/10.0
+CAPACITY NETWORKSIZE
+DELAY_MEAN 2001
+DELAY_VAR 0
+DELTAF 2000
 
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime CYCLE
+simulation.endtime 360 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -42,26 +41,17 @@ protocol.overlay.baseFreq NEWSCAST_FREQ
 
 
 #-------------------- Learning layer(s) --------------------
-protocol.learningProtocol learning.protocols.MultipleLearningProtocol
+protocol.learningProtocol learning.protocols.FederatedLearningProtocol
 protocol.learningProtocol.linkable overlay
 protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
+protocol.learningProtocol.deltaF DELTAF
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
-protocol.learningProtocol.modelNames learning.models.P2Pegasos,learning.models.MergeablePegasos,learning.models.LogisticRegression,learning.models.MergeableLogisticRegression,learning.models.AdalinePerceptron
+protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 
-protocol.learningProtocol.P2Pegasos.lambda 0.0001
-protocol.learningProtocol.MergeablePegasos.lambda 0.0001
-protocol.learningProtocol.LogisticRegression.lambda 0.01
 protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
-protocol.learningProtocol.LinearRegression.lambda 0.01
-protocol.learningProtocol.AdalinePerceptron.lambda 10.0
-protocol.learningProtocol.MultiLogReg.lambda 0.01
-protocol.learningProtocol.MergeableMultiLogReg.lambda 0.01
-protocol.learningProtocol.P2Winnow.eta 1.0
-protocol.learningProtocol.P2Winnow.theta 0.5
-
 
 #-------------------- Initializers --------------------
 init.overlayInit WireKOut
@@ -73,9 +63,9 @@ init.overlayStart.protocolID overlay
 
 init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
-init.instanceLoader.trainingFile ${TRAINING_DATABASE}
-init.instanceLoader.evaluationFile ${EVALUATION_DATABASE}
-init.instanceLoader.samplesPerNode 1
+init.instanceLoader.trainingFile res/db/spambase_train.dat
+init.instanceLoader.evaluationFile res/db/spambase_eval.dat
+init.instanceLoader.samplesPerNode 4
 
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
@@ -90,15 +80,14 @@ include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels
 
 
 #-------------------- Observers --------------------
-control.prediction learning.controls.observers.PredictionObserver
-control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
-control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
-control.prediction.step LOGTIME
-control.prediction.protocol learningProtocol
-control.prediction.format gpt
+#control.prediction learning.controls.observers.FedLossObserver
+#control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
+#control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
+#control.prediction.step LOGTIME
+#control.prediction.protocol learningProtocol
+#control.prediction.format gpt
 
-control_communication.i2p desc
-control_communication.i2p.on init.instanceLoader
-control_communication.i2p.method setPredictionObserver
-control_communication.i2p.param control.prediction
-
+#control_communication.i2p desc
+#control_communication.i2p.on init.instanceLoader
+#control_communication.i2p.method setPredictionObserver
+#control_communication.i2p.param control.prediction
