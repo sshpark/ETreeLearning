@@ -43,4 +43,21 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
 
         return new MergeableLogisticRegression(mergedw, age, lambda, numberOfClasses, bias);
     }
+
+    /**
+     * this.w + model.w * alpha
+     * this.bias + model.bias * alpha
+     * why? Because (this) is started from (w = 0, bias = 0)
+     * @param model
+     * @param alpha
+     * @return
+     */
+    public MergeableLogisticRegression merge(final MergeableLogisticRegression model, double alpha) {
+        SparseVector mergedw = new SparseVector(w);
+        double age = Math.max(this.age, model.age);
+        double bias = this.bias + model.bias * alpha;
+        mergedw.add(model.w, alpha);
+
+        return new MergeableLogisticRegression(mergedw, age, lambda, numberOfClasses, bias);
+    }
 }

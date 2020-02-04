@@ -80,7 +80,7 @@ include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels
 
 
 #-------------------- Observers --------------------
-control.prediction learning.controls.observers.LossObserver
+control.prediction learning.controls.observers.FedLossObserver
 control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
 control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
 control.prediction.step LOGTIME

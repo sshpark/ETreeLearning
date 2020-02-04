@@ -75,11 +75,6 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 
             masterID = 0;
 
-            File tFile = new File("res/db/spambase_train.dat");
-            File eFile = new File("res/db/spambase_eval.dat");
-            DataBaseReader reader = DataBaseReader.createDataBaseReader("learning.DataBaseReader", tFile, eFile);
-            eval = reader.getEvalSet();
-
         } catch (Exception e) {
             throw new RuntimeException("Exception occured in initialization of " + getClass().getCanonicalName() + ": " + e);
         }
@@ -118,14 +113,14 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     public void activeThread() {
         MergeableLogisticRegression masterModel = new MergeableLogisticRegression();
         masterModel.init(prefix);
+
         System.out.println("cur time: " + CommonState.getTime() + " rec size: " + receivedModels.size());
 
+        // merge
         for (int inCommingModel = 0; receivedModels != null && inCommingModel < receivedModels.size(); inCommingModel++) {
             MergeableLogisticRegression model = (MergeableLogisticRegression) receivedModels.getModel(inCommingModel);
-            masterModel = masterModel.merge( model );
+            masterModel = masterModel.merge(model, 1.0/receivedModels.size());
         }
-        calcLoss(masterModel);
-
         workerModel = masterModel;
         receivedModels.clear();
 
@@ -138,33 +133,17 @@ public class FederatedLearningProtocol extends AbstractProtocol {
             }
         }
     }
-
-    private void calcLoss(Model model) {
-        double errs = 0.0;
-        model = (MergeableLogisticRegression) model;
-
-        for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
-            SparseVector testInstance = eval.getInstance(testIdx);
-            double y = eval.getLabel(testIdx);
-            double pred = model.predict(testInstance);
-            errs += (y == pred) ? 0.0 : 1.0;
-        }
-        errs = errs / eval.size();
-        Main.addLoss(CommonState.getTime(), errs);
-        System.err.println("Fed 0-1 error: " + errs);
-    }
-
     /**
      * Worker
      * @param message The content of the incoming message.
      */
     @Override
     public void passiveThread(ModelMessage message) {
-        Model model = message.getModel(0);
-//        System.out.println("recv model time: " + CommonState.getTime());
+        MergeableLogisticRegression model = (MergeableLogisticRegression)message.getModel(0);
+
         if (currentNode.getID() != 0) {
             // merge
-            workerModel = (Model) model.clone();
+            workerModel = model;
             // update
             update();
 

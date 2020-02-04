@@ -201,7 +201,7 @@ public class Main {
         try {
             FileWriter fileWriter = new FileWriter(
                     "/Users/huangjiaming/Documents/developer/ETreeLearning" +
-                            "/res/losses/gossip_1000.txt");
+                            "/res/losses/fed_100.txt");
             for (int i = 0; i < losses.size(); i++) {
                 fileWriter.write(realTimes.get(i) + " " + losses.get(i) +"\n");
             }

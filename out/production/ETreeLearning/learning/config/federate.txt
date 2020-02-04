@@ -1,4 +1,4 @@
-NETWORKSIZE 1000
+NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
 
 LOGTIME 2000
@@ -6,8 +6,8 @@ SEED 1234567890
 
 # Transport parameters
 DROP 0.0
-MINDELAY 1000
-MAXDELAY 1000
+MINDELAY 999
+MAXDELAY 999
 
 # Overlay parameters
 NEWSCAST_CACHESIZE NETWORKSIZE/10.0
@@ -15,7 +15,7 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 
 # Learner parameters
 CAPACITY NETWORKSIZE
-DELAY_MEAN 2001
+DELAY_MEAN 2000
 DELAY_VAR 0
 DELTAF 2000
 
@@ -65,7 +65,7 @@ init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
 init.instanceLoader.trainingFile res/db/spambase_train.dat
 init.instanceLoader.evaluationFile res/db/spambase_eval.dat
-init.instanceLoader.samplesPerNode 4
+init.instanceLoader.samplesPerNode 41
 
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
@@ -80,14 +80,14 @@ include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels
 
 
 #-------------------- Observers --------------------
-#control.prediction learning.controls.observers.FedLossObserver
-#control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
-#control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
-#control.prediction.step LOGTIME
-#control.prediction.protocol learningProtocol
-#control.prediction.format gpt
+control.prediction learning.controls.observers.LossObserver
+control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
+control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
+control.prediction.step LOGTIME
+control.prediction.protocol learningProtocol
+control.prediction.format gpt
 
-#control_communication.i2p desc
-#control_communication.i2p.on init.instanceLoader
-#control_communication.i2p.method setPredictionObserver
-#control_communication.i2p.param control.prediction
+control_communication.i2p desc
+control_communication.i2p.on init.instanceLoader
+control_communication.i2p.method setPredictionObserver
+control_communication.i2p.param control.prediction
