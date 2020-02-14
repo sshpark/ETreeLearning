@@ -1,14 +1,13 @@
-NETWORKSIZE 100
+NETWORKSIZE 1000
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100.txt
 
-LOGTIME 2000
+LOGTIME 2001
 SEED 1234567890
 
 # Transport parameters
 DROP 0.0
-MINDELAY 999
-MAXDELAY 999
+MINDELAY 1000
+MAXDELAY 1000
 
 # Overlay parameters
 NEWSCAST_CACHESIZE NETWORKSIZE/10.0
@@ -23,6 +22,7 @@ DELTAF 2000
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
+network.node learning.node.ETreeNode
 simulation.endtime 360 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
@@ -42,12 +42,12 @@ protocol.overlay.baseFreq NEWSCAST_FREQ
 
 
 #-------------------- Learning layer(s) --------------------
-protocol.learningProtocol learning.protocols.FederatedLearningProtocol
+protocol.learningProtocol learning.protocols.ETreeLearningProtocol
 protocol.learningProtocol.linkable overlay
 protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
-protocol.learningProtocol.deltaF DELTAF
+protocol.learningProtocol.layers 3
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
@@ -66,7 +66,7 @@ init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
 init.instanceLoader.trainingFile res/db/spambase_train.dat
 init.instanceLoader.evaluationFile res/db/spambase_eval.dat
-init.instanceLoader.samplesPerNode 41
+init.instanceLoader.samplesPerNode 4
 
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol

@@ -199,9 +199,7 @@ public class Main {
 
     private static void exportToTXT() {
         try {
-            FileWriter fileWriter = new FileWriter(
-                    "/Users/huangjiaming/Documents/developer/ETreeLearning" +
-                            "/res/losses/fed_100.txt");
+            FileWriter fileWriter = new FileWriter(Configuration.getString("OUTPUT_FILEPATH"));
             for (int i = 0; i < losses.size(); i++) {
                 fileWriter.write(realTimes.get(i) + " " + losses.get(i) +"\n");
             }

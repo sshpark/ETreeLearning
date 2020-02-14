@@ -1,5 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100.txt
 
 LOGTIME 2000
 SEED 1234567890
@@ -55,7 +56,7 @@ protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
 
 #-------------------- Initializers --------------------
 init.overlayInit WireKOut
-init.overlayInit.k NEWSCAST_CACHESIZE
+init.overlayInit.k NETWORKSIZE/10.0
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
@@ -80,7 +81,7 @@ include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels
 
 
 #-------------------- Observers --------------------
-control.prediction learning.controls.observers.LossObserver
+control.prediction learning.controls.observers.FedLossObserver
 control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
 control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
 control.prediction.step LOGTIME

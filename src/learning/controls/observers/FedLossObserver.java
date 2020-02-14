@@ -36,7 +36,7 @@ public class FedLossObserver extends PredictionObserver {
 
         errs = errs / eval.size();
         Main.addLoss(CommonState.getTime(), errs);
-        System.err.println("0-1 error: " + errs);
+        System.err.println("Fed 0-1 error: " + errs);
         return false;
     }
 }

@@ -16,10 +16,11 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
   private static final long serialVersionUID = -6445114719685631031L;
   
   /**
-   * The learning parameter is 0.0001 by default.
+   * The learning parameter is 2 by default.
    */
   protected static final String PAR_LAMBDA = "LogisticRegression.lambda";
-  protected double lambda = 0.000001;
+  protected double lambda = 10000;
+
   
   /** @hidden */
   protected SparseVector w;
@@ -71,11 +72,10 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
     double err = label - prob;
     age ++;
     double nu = 1.0 / (lambda * age);
-    
+
     w.mul(1.0 - nu * lambda);
     w.add(instance, - nu * err);
     bias -= nu * err;
-
   }
   
   /**

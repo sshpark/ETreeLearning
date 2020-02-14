@@ -1,13 +1,14 @@
-NETWORKSIZE 1000
+NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/gossip_100.txt
 
 LOGTIME 1000
 SEED 1234567890
 
 # Transport parameters
 DROP 0.0
-MINDELAY 1000
-MAXDELAY 1000
+MINDELAY 999
+MAXDELAY 999
 
 # Overlay parameters
 NEWSCAST_CACHESIZE NETWORKSIZE/10.0
@@ -15,7 +16,7 @@ NEWSCAST_FREQ ONLINESIZE/10.0
 
 # Learner parameters
 CAPACITY NETWORKSIZE
-DELAY_MEAN 1001
+DELAY_MEAN 1000
 DELAY_VAR 0
 DELTAG 1000
 
@@ -55,7 +56,7 @@ protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
 
 #-------------------- Initializers --------------------
 init.overlayInit WireKOut
-init.overlayInit.k NEWSCAST_CACHESIZE
+init.overlayInit.k NETWORKSIZE/10.0
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
@@ -65,7 +66,7 @@ init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
 init.instanceLoader.trainingFile res/db/spambase_train.dat
 init.instanceLoader.evaluationFile res/db/spambase_eval.dat
-init.instanceLoader.samplesPerNode 4
+init.instanceLoader.samplesPerNode 41
 
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
@@ -80,7 +81,7 @@ include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels
 
 
 #-------------------- Observers --------------------
-control.prediction learning.controls.observers.FedLossObserver
+control.prediction learning.controls.observers.LossObserver
 control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
 control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
 control.prediction.step LOGTIME

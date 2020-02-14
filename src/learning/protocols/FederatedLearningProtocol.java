@@ -1,11 +1,9 @@
 package learning.protocols;
 
-import learning.DataBaseReader;
 import learning.InstanceHolder;
 import learning.interfaces.AbstractProtocol;
 import learning.interfaces.Model;
 import learning.interfaces.ModelHolder;
-import learning.main.Main;
 import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
 import learning.messages.OnlineSessionFollowerActiveThreadMessage;
@@ -17,9 +15,6 @@ import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
-
-import java.io.File;
-
 
 /**
  * @author sshpark
@@ -113,8 +108,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     public void activeThread() {
         MergeableLogisticRegression masterModel = new MergeableLogisticRegression();
         masterModel.init(prefix);
-
-        System.out.println("cur time: " + CommonState.getTime() + " rec size: " + receivedModels.size());
+//        System.out.println("cur time: " + CommonState.getTime() + " rec size: " + receivedModels.size());
 
         // merge
         for (int inCommingModel = 0; receivedModels != null && inCommingModel < receivedModels.size(); inCommingModel++) {
