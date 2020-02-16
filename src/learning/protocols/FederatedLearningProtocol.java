@@ -1,9 +1,9 @@
 package learning.protocols;
 
-import learning.InstanceHolder;
 import learning.interfaces.AbstractProtocol;
 import learning.interfaces.Model;
 import learning.interfaces.ModelHolder;
+import learning.main.Main;
 import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
 import learning.messages.OnlineSessionFollowerActiveThreadMessage;
@@ -21,18 +21,17 @@ import peersim.edsim.EDSimulator;
  * @date 30/1/2020
  */
 public class FederatedLearningProtocol extends AbstractProtocol {
+
     private final static String PAR_MODELHOLDERNAME = "modelHolderName";
     private final static String PAR_MODELNAME = "modelName";
+    private final static String PAR_COMPRESS = "compress";
     private final static String PAR_DELTAF = "deltaF";
 
     /** @hidden */
     private final String modelHolderName;
-    /** @hidden */
     private final String modelName;
-    /** @hidden */
+    private final int compress;
     private final long deltaF;
-
-    private InstanceHolder eval;
 
     private Model workerModel;
     private ModelHolder receivedModels;
@@ -41,6 +40,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     public FederatedLearningProtocol(String prefix) {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
         modelName = Configuration.getString(prefix + "." + PAR_MODELNAME);
+        compress = Configuration.getInt(prefix + "." + PAR_COMPRESS);
         deltaF = Configuration.getLong(prefix + "." + PAR_DELTAF);
         init(prefix);
     }
@@ -52,9 +52,11 @@ public class FederatedLearningProtocol extends AbstractProtocol {
      * @param modelName
      * @param deltaF
      */
-    private FederatedLearningProtocol(String prefix, String modelHolderName, String modelName, long deltaF) {
+    private FederatedLearningProtocol(String prefix, String modelHolderName, String modelName,
+                                      int compress, long deltaF) {
         this.modelHolderName = modelHolderName;
         this.modelName = modelName;
+        this.compress = compress;
         this.deltaF = deltaF;
         init(prefix);
     }
@@ -69,7 +71,6 @@ public class FederatedLearningProtocol extends AbstractProtocol {
             workerModel.init(prefix);
 
             masterID = 0;
-
         } catch (Exception e) {
             throw new RuntimeException("Exception occured in initialization of " + getClass().getCanonicalName() + ": " + e);
         }
@@ -77,7 +78,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 
     @Override
     public Object clone() {
-        return new FederatedLearningProtocol(prefix, modelHolderName, modelName, deltaF);
+        return new FederatedLearningProtocol(prefix, modelHolderName, modelName, compress, deltaF);
     }
 
 
@@ -104,6 +105,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         }
     }
 
+
     @Override
     public void activeThread() {
         MergeableLogisticRegression masterModel = new MergeableLogisticRegression();
@@ -111,11 +113,12 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 //        System.out.println("cur time: " + CommonState.getTime() + " rec size: " + receivedModels.size());
 
         // merge
-        for (int inCommingModel = 0; receivedModels != null && inCommingModel < receivedModels.size(); inCommingModel++) {
-            MergeableLogisticRegression model = (MergeableLogisticRegression) receivedModels.getModel(inCommingModel);
-            masterModel = masterModel.merge(model, 1.0/receivedModels.size());
-        }
+        masterModel = masterModel.aggregateDefault(receivedModels);
         workerModel = masterModel;
+
+        // print loss
+        computeLoss();
+
         receivedModels.clear();
 
         // send to worker
@@ -136,14 +139,15 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         MergeableLogisticRegression model = (MergeableLogisticRegression)message.getModel(0);
 
         if (currentNode.getID() != 0) {
-            // merge
+            model = update(model);
             workerModel = model;
-            // update
-            update();
+
+            // compress weight
+            model = model.compressSubsampling(compress);
 
             // send to master node
             ModelHolder latestModelHolder = new BoundedModelHolder(1);
-            latestModelHolder.add(workerModel);
+            latestModelHolder.add(model);
             sendTo(new ModelMessage(currentNode, latestModelHolder), Network.get(masterID));
         } else {
             receivedModels.add(model);
@@ -151,16 +155,16 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     }
 
 
-    private void update() {
+    private MergeableLogisticRegression update(MergeableLogisticRegression model) {
         // update
         for (int sampleID = 0; instances != null && sampleID < instances.size(); sampleID++) {
             // we use each samples for updating the currently processed model
             SparseVector x = instances.getInstance(sampleID);
             double y = instances.getLabel(sampleID);
-            workerModel.update(x, y);
+            model.update(x, y);
         }
+        return model;
     }
-
     /**
      *
      * @param message
@@ -168,6 +172,21 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     private void sendTo(ModelMessage message, Node dst) {
         message.setSource(currentNode);
         getTransport().send(currentNode, dst, message, currentProtocolID);
+    }
+
+    @Override
+    public void computeLoss() {
+        double errs = 0.0;
+        for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
+            SparseVector testInstance = eval.getInstance(testIdx);
+            double y = eval.getLabel(testIdx);
+            double pred = workerModel.predict(testInstance);
+            errs += (y == pred) ? 0.0 : 1.0;
+        }
+        errs = errs / eval.size();
+        cycle++;
+        Main.addLoss(cycle, errs);
+        System.err.println("Cycle: "+ cycle + " Fed 0-1 error: " + errs);
     }
 
     /**

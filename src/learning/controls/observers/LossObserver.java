@@ -17,6 +17,7 @@ import java.util.Set;
  * @date 28/1/2020
  */
 public class LossObserver extends PredictionObserver {
+    private long cycle = 0;
     public LossObserver(String prefix) throws Exception {
         super(prefix);
     }
@@ -40,8 +41,9 @@ public class LossObserver extends PredictionObserver {
             }
         }
         errs = errs / (eval.size() * Network.size());
-        Main.addLoss(CommonState.getTime(), errs);
-        System.err.println("0-1 error: " + errs);
+        cycle++;
+        Main.addLoss(cycle, errs);
+        System.err.println("Cycle: "+ cycle + " Gossip 0-1 error: " + errs);
         return false;
     }
 }

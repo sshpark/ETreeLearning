@@ -57,7 +57,12 @@ public class MultipleLearningProtocol extends AbstractProtocol {
     this.modelNames = modelNames;
     init(prefix);
   }
-  
+
+  @Override
+  public void computeLoss() {
+
+  }
+
   /**
    * It initializes the starting modelHolder and model structure.
    * 

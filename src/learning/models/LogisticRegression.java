@@ -66,16 +66,18 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
     lambda = Configuration.getDouble(prefix + "." + PAR_LAMBDA, 0.0001);
   }
 
+  private double dw = 0.0;
+  private double db = 0.0;
+  private double beta = 0.99;
   @Override
   public void update(SparseVector instance, double label) {
     double prob = getPositiveProbability(instance);
     double err = label - prob;
     age ++;
-    double nu = 1.0 / (lambda * age);
 
-    w.mul(1.0 - nu * lambda);
-    w.add(instance, - nu * err);
-    bias -= nu * err;
+    w.mul(1.0 - 0.01 * lambda);
+    w.add(instance, -lambda * err);
+//    bias -= lambda * err;
   }
   
   /**
@@ -86,7 +88,7 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
    */
   private double getPositiveProbability(SparseVector instance){
     SparseVector ins = (SparseVector)instance.clone();
-    double predict = w.mul(ins.normalize()) + bias;
+    double predict = w.mul(ins) + bias;
     predict = Math.exp(predict) + 1.0;
     return 1.0 / predict;
   }

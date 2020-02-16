@@ -3,26 +3,34 @@ package learning.node;
 import peersim.core.GeneralNode;
 import peersim.core.Network;
 
+import java.util.ArrayList;
+
 /**
  * @author sshpark
  * @date 14/2/2020
  */
 public class ETreeNode extends GeneralNode {
-    private final int MAX_LAYERS = Network.size();
-    private int[] parentNodeID;
+    private ArrayList<Integer> parentNodeID;
+    private ArrayList<ArrayList<Integer>> childNodeIDList;
 
     public ETreeNode(String prefix) {
         super(prefix);
-        parentNodeID = new int[MAX_LAYERS];
+        parentNodeID = new ArrayList<>();
     }
 
     public void setParentNode(int layer, int parentID) {
-        if (layer > MAX_LAYERS) throw new RuntimeException("layer must be less than Network size!");
-        parentNodeID[layer] = parentID;
+        parentNodeID.set(layer, parentID);
     }
 
-    public int getParentNode(int layer) {
-        if (layer > MAX_LAYERS) throw new RuntimeException("layer must be less than Network size!");
-        return parentNodeID[layer];
+    public Integer getParentNode(int layer) {
+        return parentNodeID.get(layer);
+    }
+
+    public ArrayList<Integer> getChildNodeList(int layer) {
+        return childNodeIDList.get(layer);
+    }
+
+    public void setChildNodeList(ArrayList<ArrayList<Integer>> childNodeIDList) {
+        this.childNodeIDList = childNodeIDList;
     }
 }

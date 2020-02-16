@@ -16,6 +16,7 @@ public class FedLossObserver extends PredictionObserver {
     public FedLossObserver(String prefix) throws Exception {
         super(prefix);
     }
+    private long cycle = 0;
 
     @Override
     public boolean execute() {
@@ -35,8 +36,9 @@ public class FedLossObserver extends PredictionObserver {
         }
 
         errs = errs / eval.size();
-        Main.addLoss(CommonState.getTime(), errs);
-        System.err.println("Fed 0-1 error: " + errs);
+        cycle++;
+        Main.addLoss(cycle, errs);
+        System.err.println("Cycle: "+ cycle + " Fed 0-1 error: " + errs);
         return false;
     }
 }

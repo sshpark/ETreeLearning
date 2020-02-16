@@ -1,8 +1,8 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/gossip_100.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/gossip_100_100.txt
 
-LOGTIME 1000
+LOGTIME 2000
 SEED 1234567890
 
 # Transport parameters
@@ -47,9 +47,12 @@ protocol.learningProtocol.linkable overlay
 protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
+protocol.learningProtocol.compress 100
 protocol.learningProtocol.deltaG DELTAG
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
+protocol.learningProtocol.trainingFile res/db/spambase_train.dat
+protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
 protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 
 protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01

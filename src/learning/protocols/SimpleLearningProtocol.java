@@ -97,7 +97,12 @@ public class SimpleLearningProtocol extends AbstractProtocol {
   public Object clone() {
     return new SimpleLearningProtocol(prefix, delayMean, delayVar, modelHolderName, modelName);
   }
-  
+
+  @Override
+  public void computeLoss() {
+
+  }
+
   /**
    * Sends the latest model to a uniformly selected random neighbor.
    */

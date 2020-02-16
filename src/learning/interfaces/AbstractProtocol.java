@@ -1,5 +1,6 @@
 package learning.interfaces;
 
+import learning.DataBaseReader;
 import learning.InstanceHolder;
 import learning.controls.ChurnControl;
 import learning.messages.ActiveThreadMessage;
@@ -13,6 +14,8 @@ import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
+
+import java.io.File;
 
 /**
  * This abstract base class (ABC) is situated between the Peersim protocol interface
@@ -31,6 +34,17 @@ import peersim.transport.Transport;
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractProtocol implements EDProtocol, Churnable, LearningProtocol {
+  // compute eval accuracy
+  private static final String PAR_TFILE = "trainingFile";
+  private static final String PAR_EFILE = "evaluationFile";
+  protected File tFile;
+  protected File eFile;
+  protected String readerClassName;
+  protected DataBaseReader reader;
+  protected InstanceHolder eval;
+  protected long cycle;
+
+
   //active thread delay mean and variance
   /** @hidden */
   protected static final String PAR_DELAYMEAN = "delayMean";
@@ -60,11 +74,26 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
    */
   @Override
   public abstract Object clone();
+
+  /**
+   * compute loss
+   */
+  public abstract void computeLoss();
   
   protected void init(String prefix) {
     this.prefix = prefix;
     delayMean = Configuration.getDouble(prefix + "." + PAR_DELAYMEAN, Double.POSITIVE_INFINITY);
     delayVar = Configuration.getDouble(prefix + "." + PAR_DELAYVAR, 1.0);
+    tFile = new File(Configuration.getString(prefix + "." + PAR_TFILE));
+    eFile = new File(Configuration.getString(prefix + "." + PAR_EFILE));
+    readerClassName = "learning.DataBaseReader";
+    try {
+      reader = DataBaseReader.createDataBaseReader(readerClassName, tFile, eFile);
+      eval = reader.getEvalSet();
+      cycle = 0;
+    } catch (Exception ex) {
+      throw new RuntimeException("Exception has occurred in InstanceLoader!", ex);
+    }
   }
   
   /**
