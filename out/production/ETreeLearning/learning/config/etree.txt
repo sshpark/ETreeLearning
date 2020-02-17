@@ -1,13 +1,13 @@
-NETWORKSIZE 1000
+NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
 
-LOGTIME 2001
+LOGTIME 2000
 SEED 1234567890
 
 # Transport parameters
 DROP 0.0
-MINDELAY 1000
-MAXDELAY 1000
+MINDELAY 999
+MAXDELAY 999
 
 # Overlay parameters
 NEWSCAST_CACHESIZE NETWORKSIZE/10.0
@@ -48,8 +48,11 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers 3
+protocol.learningProtocol.ratios 1,2
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
+protocol.learningProtocol.trainingFile res/db/spambase_train.dat
+protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
 protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 
 protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01

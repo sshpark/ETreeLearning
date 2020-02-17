@@ -154,7 +154,6 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         }
     }
 
-
     private MergeableLogisticRegression update(MergeableLogisticRegression model) {
         // update
         for (int sampleID = 0; instances != null && sampleID < instances.size(); sampleID++) {

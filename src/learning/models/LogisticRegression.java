@@ -74,7 +74,6 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
     double prob = getPositiveProbability(instance);
     double err = label - prob;
     age ++;
-
     w.mul(1.0 - 0.01 * lambda);
     w.add(instance, -lambda * err);
 //    bias -= lambda * err;

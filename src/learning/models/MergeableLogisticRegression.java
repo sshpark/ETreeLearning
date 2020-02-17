@@ -91,7 +91,6 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
      * @return
      */
     public MergeableLogisticRegression aggregateDefault(ModelHolder models) {
-        final int n = w.size();
         double agg_age = 0.0;
 
         // aggregate age
