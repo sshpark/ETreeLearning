@@ -4,12 +4,11 @@ from sys import argv
 import numpy as np
 
 n = int(argv[1])
-delayMean = int(argv[2])
-delayVar = int(argv[3])
+m = int(argv[2])
+delayMean = int(argv[3])
+delayVar = int(argv[4])
 
 test_data = IO(file_prefix='../db/data'+str(n), data_id="")
-
-m = 2*n
 
 graph = Graph.UDAG(n, m, self_loop=False, repeated_edges=False)
 

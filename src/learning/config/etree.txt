@@ -1,10 +1,9 @@
-NETWORKSIZE 10
+NETWORKSIZE 1000
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100_100.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_1000_100.txt
 
 # Network topology parameters
-TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data10.in
-LAYERS 2
+LAYERS 4
 
 LOGTIME 2000
 SEED 1234567890
@@ -53,20 +52,20 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
-protocol.learningProtocol.ratios 2
+protocol.learningProtocol.ratios 1,2,2,1
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.trainingFile res/db/spambase_train.dat
 protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
 protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 
-protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
+protocol.learningProtocol.MergeableLogisticRegression.lambda 0.05
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.ETreeLogicalTopology
-init.overlayInit.topoFilePath /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data10.in
+init.overlayInit.topoFilePath /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data1000.in
 init.overlayInit.layers LAYERS
-init.overlayInit.groups 1,1
+init.overlayInit.groups 10,3,1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
@@ -88,17 +87,3 @@ init.learningProtocolStart.delay 0
 
 #-------------------- Define Init Sequence --------------------
 include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels learningProtocolStart
-
-
-#-------------------- Observers --------------------
-#control.prediction learning.controls.observers.FedLossObserver
-#control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
-#control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
-#control.prediction.step LOGTIME
-#control.prediction.protocol learningProtocol
-#control.prediction.format gpt
-
-#control_communication.i2p desc
-#control_communication.i2p.on init.instanceLoader
-#control_communication.i2p.method setPredictionObserver
-#control_communication.i2p.param control.prediction

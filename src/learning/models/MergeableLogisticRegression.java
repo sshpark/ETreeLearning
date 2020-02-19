@@ -17,6 +17,10 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
         super();
     }
 
+    public SparseVector getWeight() {
+        return w;
+    }
+
     /**
      * Returns a new mergeable logistic regression object that initializes its variable with
      * the deep copy of the specified parameters using the super constructor.
