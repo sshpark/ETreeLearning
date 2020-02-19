@@ -1,5 +1,10 @@
-NETWORKSIZE 100
+NETWORKSIZE 10
 ONLINESIZE NETWORKSIZE
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100_100.txt
+
+# Network topology parameters
+TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data10.in
+LAYERS 2
 
 LOGTIME 2000
 SEED 1234567890
@@ -47,8 +52,8 @@ protocol.learningProtocol.linkable overlay
 protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
-protocol.learningProtocol.layers 3
-protocol.learningProtocol.ratios 1,2
+protocol.learningProtocol.layers LAYERS
+protocol.learningProtocol.ratios 2
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.trainingFile res/db/spambase_train.dat
@@ -58,8 +63,10 @@ protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
 
 #-------------------- Initializers --------------------
-init.overlayInit WireKOut
-init.overlayInit.k NETWORKSIZE/10.0
+init.overlayInit learning.topology.ETreeLogicalTopology
+init.overlayInit.topoFilePath /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data10.in
+init.overlayInit.layers LAYERS
+init.overlayInit.groups 1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
@@ -69,7 +76,7 @@ init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
 init.instanceLoader.trainingFile res/db/spambase_train.dat
 init.instanceLoader.evaluationFile res/db/spambase_eval.dat
-init.instanceLoader.samplesPerNode 4
+init.instanceLoader.samplesPerNode 41
 
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
@@ -84,14 +91,14 @@ include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels
 
 
 #-------------------- Observers --------------------
-control.prediction learning.controls.observers.FedLossObserver
-control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
-control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
-control.prediction.step LOGTIME
-control.prediction.protocol learningProtocol
-control.prediction.format gpt
+#control.prediction learning.controls.observers.FedLossObserver
+#control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
+#control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
+#control.prediction.step LOGTIME
+#control.prediction.protocol learningProtocol
+#control.prediction.format gpt
 
-control_communication.i2p desc
-control_communication.i2p.on init.instanceLoader
-control_communication.i2p.method setPredictionObserver
-control_communication.i2p.param control.prediction
+#control_communication.i2p desc
+#control_communication.i2p.on init.instanceLoader
+#control_communication.i2p.method setPredictionObserver
+#control_communication.i2p.param control.prediction

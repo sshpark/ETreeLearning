@@ -3,6 +3,7 @@ package learning.protocols;
 import learning.interfaces.AbstractProtocol;
 import learning.interfaces.Model;
 import learning.interfaces.ModelHolder;
+import learning.main.Main;
 import learning.messages.*;
 import learning.modelHolders.BoundedModelHolder;
 import learning.models.MergeableLogisticRegression;
@@ -31,9 +32,9 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     private final String modelName;
     private final int layers;
 
-    private HashMap<Integer, Model>[] layersWorkerModel;
-    private HashMap<Integer, HashMap<Integer, ModelHolder>> layersReceivedModels;
-    private ArrayList<ArrayList<Integer>> layersNodeID;
+    private Model[] layersWorkerModel;
+    private ModelHolder[] layersReceivedModels;
+    private static ArrayList<ArrayList<Integer>> layersNodeID;
     private int[] aggregateRatio;
     private int iter;
 
@@ -56,11 +57,10 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         try {
             super.init(prefix);
             // init received models
-            layersReceivedModels = new HashMap<>();
+            layersReceivedModels = new ModelHolder[layers];
+
             // init worker model
-            layersWorkerModel = new HashMap[layers];
-            for (int i = 0; i < layers; i++)
-                layersWorkerModel[i] = new HashMap<>();
+            layersWorkerModel = new Model[layers];
 
             // init ratios
             String[] agg_ratios = Configuration.getString(prefix + "." + PAR_RATIOS).split(",");
@@ -84,8 +84,8 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         if (messageObj instanceof ActiveThreadMessage) {
             iter++;
             ETreeNode node = (ETreeNode) currentNode;
-
             int temp = 1;
+
             for (int layer = 0; layer < layers-1; layer++) {
                 temp *= aggregateRatio[layer];
                 if (iter % temp == 0) {
@@ -101,24 +101,29 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                     ModelHolder latestModelHolder = new BoundedModelHolder(1);
                     latestModelHolder.add(wkmodel);
                     sendTo(new MessageUp(node, layer, latestModelHolder), node.getParentNode(layer));
+                } else {
+                    // next time to update
+                    EDSimulator.add(1, ActiveThreadMessage.getInstance(),
+                            currentNode, currentProtocolID);
                 }
             }
         } else if (messageObj instanceof MessageUp) { // receive message from child node
-
             int layer = ((MessageUp) messageObj).getLayer()+1; // current layer = source layer+1
             int nodeid = (int)currentNode.getID();          // current node id
+
+//            System.out.println("current node: " + nodeid + ", src: " + ((MessageUp) messageObj).getSource().getID()
+//            +", current layer: " + layer);
 
             // child node next time to update
             EDSimulator.add(1, ActiveThreadMessage.getInstance(),
                     ((MessageUp) messageObj).getSource(), currentProtocolID);
 
             // get received model where from current layer, current node
-            ModelHolder receivedModel = layersReceivedModels.get(layer).get(nodeid);
+            ModelHolder receivedModel = layersReceivedModels[layer];
 
             // if key is null, init it.
             if (receivedModel == null) {
                 receivedModel = new BoundedModelHolder( Network.size() );
-                receivedModel.init(prefix);
             }
             // add model to specified layer and specified node
             receivedModel.add(((MessageUp) messageObj).getModel(0));
@@ -126,8 +131,12 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             int numOfChildNode = ((ETreeNode)currentNode)
                                 .getChildNodeList(layer)
                                 .size();
+            // it must update layersReceivedModels
+            layersReceivedModels[layer].put(nodeid, receivedModel);
+
             // judge whether to aggregate
             if (receivedModel.size() == numOfChildNode) {
+
                 // add worker model where from current layer and current node
                 Model workerModel = layersWorkerModel[layer].get(nodeid);
                 if (workerModel == null) {
@@ -138,7 +147,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
                 // aggregate receive model
                 workerModel = ((MergeableLogisticRegression)workerModel).aggregateDefault(receivedModel);
-
+                receivedModel.clear();
                 // send to its child node,
                 // note that if layer == layers-1(root), it should send to all node
                 // else send to its child node's layer
@@ -149,10 +158,12 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                             ETreeLearningProtocol temp_node_pro = (ETreeLearningProtocol) Network
                                     .get(id)
                                     .getProtocol(currentProtocolID);
-                            temp_node_pro.setLayersWorkerModel(layer, id, workerModel);
+                            temp_node_pro.setLayersWorkerModel(ly, id, workerModel);
                         }
                     }
+                    computeLoss(workerModel);
                 } else {
+//                    System.out.println("ArrayList<Integer> childNodes");
                     ArrayList<Integer> childNodes = ((ETreeNode)currentNode).getChildNodeList(layer);
                     for (Integer id : childNodes) {
                         ETreeLearningProtocol temp_node_pro = (ETreeLearningProtocol) Network
@@ -190,9 +201,23 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         }
         return false;
     }
+
     @Override
     public void computeLoss() {
+    }
 
+    private void computeLoss(Model workerModel) {
+        double errs = 0.0;
+        for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
+            SparseVector testInstance = eval.getInstance(testIdx);
+            double y = eval.getLabel(testIdx);
+            double pred = workerModel.predict(testInstance);
+            errs += (y == pred) ? 0.0 : 1.0;
+        }
+        errs = errs / eval.size();
+        cycle++;
+        Main.addLoss(cycle, errs);
+        System.err.println("Cycle: "+ cycle + " ETree 0-1 error: " + errs);
     }
 
     @Override
@@ -221,6 +246,17 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             Node node = Network.get(dst.get(i));
             getTransport().send(currentNode, node, message, currentProtocolID);
         }
+    }
+
+    public static void setLayersNodeID(ArrayList<ArrayList<Integer>> layersID) {
+        layersNodeID = layersID;
+//        for (ArrayList<Integer> node : layersNodeID) {
+//            System.out.print(node.size() + ": ");
+//            for (Integer id : node) {
+//                System.out.print(id + " ");
+//            }
+//            System.out.println();
+//        }
     }
 
 
