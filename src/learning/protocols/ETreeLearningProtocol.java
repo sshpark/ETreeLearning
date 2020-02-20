@@ -8,6 +8,7 @@ import learning.messages.*;
 import learning.modelHolders.BoundedModelHolder;
 import learning.models.MergeableLogisticRegression;
 import learning.node.ETreeNode;
+import learning.topology.TopoUtil;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -15,7 +16,6 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -32,19 +32,23 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     /** @hidden */
     private final String modelHolderName;
     private final String modelName;
+    private final String topoFilePath;
     private final int layers;
+
 
     private Model[] layersWorkerModel;
     private ModelHolder[] layersReceivedModels;
-    private static ArrayList<ArrayList<Integer>> layersNodeID;
     private int[] aggregateRatio;
     private int[] aggregateCount;
+    private int[][] graph;
+    private int[][] minDelayMatrix;
 
 
     public ETreeLearningProtocol(String prefix) {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
         modelName = Configuration.getString(prefix + "." + PAR_MODELNAME);
         layers = Configuration.getInt(prefix + "." + PAR_LAYERS);
+        topoFilePath = Configuration.getString("TOPO_FILEPATH");
         init(prefix);
     }
 
@@ -55,9 +59,11 @@ public class ETreeLearningProtocol extends AbstractProtocol {
      * @param modelName
      * @param layers
      */
-    private ETreeLearningProtocol(String prefix, String modelHolderName, String modelName, int layers) {
+    private ETreeLearningProtocol(String prefix, String modelHolderName, String modelName,
+                                  String topoFilePath, int layers) {
         this.modelHolderName = modelHolderName;
         this.modelName = modelName;
+        this.topoFilePath = topoFilePath;
         this.layers = layers;
         init(prefix);
     }
@@ -89,8 +95,11 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
             // init aggregate count
             aggregateCount = new int[layers];
-
             cycle = 1;
+
+            // init minDelayMatrix
+            graph = TopoUtil.getGraph(Network.size(), topoFilePath);
+            minDelayMatrix = TopoUtil.generateMinDelayMatrix(graph);
         } catch (Exception e) {
             throw new RuntimeException("Exception occured in initialization of " + getClass().getCanonicalName() + ": " + e);
         }
@@ -119,11 +128,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
         } else if (messageObj instanceof MessageUp) { // receive message from child node
             int layer = ((MessageUp) messageObj).getLayer()+1;  // current layer = source layer+1
-            // tell to next update
-            if (layer == 1) {
-                EDSimulator.add(0, ActiveThreadMessage.getInstance(), ((MessageUp) messageObj).getSource(),
-                        currentProtocolID);
-            }
 
 //            System.out.println("current time: " + CommonState.getTime() + ", current node: " + currentNode.getID() + ", src: " + ((MessageUp) messageObj).getSource().getID()
 //            +", current layer: " + layer);
@@ -164,11 +168,24 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                         sendTo(new MessageUp(currentNode, layer, latestModelHolder),
                                 ((ETreeNode) currentNode).getParentNode(layer));
                     } else {
-//                        System.out.println("Time: " + CommonState.getTime() + ", root aggregate");
+                        //System.out.println("Time: " + CommonState.getTime() + ", root aggregate");
                         computeLoss(workerModel);
                     }
                 }
             }
+
+            // Why is this code in this location?
+            // Because if there is a model release process, you need to
+            // wait for the process to complete before letting the leaf node start updating.
+            if (layer == 1) {
+                int src = currentNode.getIndex();
+                int dest = ((MessageUp) messageObj).getSource().getIndex();
+                int delay = minDelayMatrix[src][dest];
+                // moment of message arrival
+                EDSimulator.add(delay+1, ActiveThreadMessage.getInstance(), ((MessageUp) messageObj).getSource(),
+                        currentProtocolID);
+            }
+
         }
     }
 
@@ -183,16 +200,9 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         return (MergeableLogisticRegression) model;
     }
 
-    private void startNextIteration() {
-        for (int i = 0; i < Network.size(); i++) {
-            Node node = Network.get(i);
-            // schedule starter alarm
-            EDSimulator.add(0, ActiveThreadMessage.getInstance(), node, currentProtocolID);
-        }
-    }
-
     /**
-     * Update the model of all children of root node
+     * Send the model to all child nodes of root.
+     * It should be noted that the simulation time is updated during the model release process.
      * @param root
      * @param layer
      * @param model
@@ -200,7 +210,8 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     private void bfs(ETreeNode root, int layer, Model model) {
         Queue<ETreeNode> q = new LinkedList<>();
         q.offer(root);
-
+        int maxDelay = 0;
+        int src = root.getIndex();
         while (q.isEmpty()) {
             ETreeNode top = q.poll();
             int cnt = top.getChildNodeList(layer).size();
@@ -212,10 +223,13 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                     ETreeLearningProtocol temp_node_pro = (ETreeLearningProtocol) temp.getProtocol(currentProtocolID);
                     temp_node_pro.setLayersWorkerModel(layer, model);
                     q.offer(temp);
+                    maxDelay = Math.max(maxDelay, minDelayMatrix[src][id]);
                 }
             }
             layer--;
         }
+        // update simulation time
+        CommonState.setTime( CommonState.getTime() + maxDelay );
     }
 
     @Override
@@ -232,13 +246,13 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         }
         errs = errs / eval.size();
         cycle++;
-        Main.addLoss(cycle, errs);
-        System.err.println("Cycle: "+ cycle + " ETree 0-1 error: " + errs);
+        Main.addLoss(CommonState.getTime(), errs);
+        System.err.println("Time: "+ CommonState.getTime() + " ETree 0-1 error: " + errs);
     }
 
     @Override
     public Object clone() {
-        return new ETreeLearningProtocol(prefix, modelHolderName, modelName, layers);
+        return new ETreeLearningProtocol(prefix, modelHolderName, modelName, topoFilePath, layers);
     }
 
     /**
@@ -251,18 +265,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         Node node = Network.get(dst);
         getTransport().send(currentNode, node, message, currentProtocolID);
     }
-
-    public static void setLayersNodeID(ArrayList<ArrayList<Integer>> layersID) {
-        layersNodeID = layersID;
-//        for (ArrayList<Integer> node : layersNodeID) {
-//            System.out.print(node.size() + ": ");
-//            for (Integer id : node) {
-//                System.out.print(id + " ");
-//            }
-//            System.out.println();
-//        }
-    }
-
 
     @Override
     public void activeThread() {

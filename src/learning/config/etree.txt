@@ -1,17 +1,16 @@
-NETWORKSIZE 1000
+NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_1000_100.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100_100.txt
 
 # Network topology parameters
-LAYERS 4
+TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
+LAYERS 3
 
-LOGTIME 2000
+LOGTIME 100
 SEED 1234567890
 
 # Transport parameters
 DROP 0.0
-MINDELAY 999
-MAXDELAY 999
 
 # Overlay parameters
 NEWSCAST_CACHESIZE NETWORKSIZE/10.0
@@ -21,22 +20,18 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
-DELTAF 2000
 
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
 network.node learning.node.ETreeNode
-simulation.endtime 360 * 1000
+simulation.endtime 5*1000
 simulation.logtime LOGTIME
 random.seed SEED
 
 
 #-------------------- Transport layer --------------------
-protocol.transport UniformRandomTransport
-protocol.transport.mindelay MINDELAY
-protocol.transport.maxdelay MAXDELAY
-
+protocol.transport MinDelayTransport
 
 #-------------------- Connection layer --------------------
 protocol.overlay peersim.extras.mj.ednewscast.EdNewscast
@@ -52,7 +47,7 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
-protocol.learningProtocol.ratios 1,2,2,1
+protocol.learningProtocol.ratios 1,2,1
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.trainingFile res/db/spambase_train.dat
@@ -63,9 +58,8 @@ protocol.learningProtocol.MergeableLogisticRegression.lambda 0.05
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.ETreeLogicalTopology
-init.overlayInit.topoFilePath /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data1000.in
 init.overlayInit.layers LAYERS
-init.overlayInit.groups 10,3,1,1
+init.overlayInit.groups 2,1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer

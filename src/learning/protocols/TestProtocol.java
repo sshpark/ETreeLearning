@@ -53,9 +53,13 @@ public class TestProtocol extends AbstractProtocol {
 
     @Override
     public void processEvent(Node currentNode, int currentProtocolID, Object messageObj) {
-        iter++;
-        System.out.println(CommonState.getTime() + ": " + iter);
-        EDSimulator.add(1, ActiveThreadMessage.getInstance(), currentNode, currentProtocolID);
+        if (messageObj instanceof ActiveThreadMessage) {
+            if (currentNode.getIndex() == 1) {
+                iter++;
+                System.out.println(CommonState.getTime() + ": " + iter);
+                EDSimulator.add(1000, ActiveThreadMessage.getInstance(), currentNode, currentProtocolID);
+            }
+        }
     }
 
     @Override

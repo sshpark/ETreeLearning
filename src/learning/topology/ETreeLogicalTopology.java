@@ -14,7 +14,6 @@ import java.util.ArrayList;
  * @date 17/2/2020
  */
 public class ETreeLogicalTopology extends WireGraph {
-    private final static String PAR_TOPO_FILEPATH = "topoFilePath";
     private final String topoFilePath;
 
     private final static String PAR_LAYERS = "layers";
@@ -35,7 +34,7 @@ public class ETreeLogicalTopology extends WireGraph {
      */
     public ETreeLogicalTopology(String prefix) {
         super(prefix);
-        topoFilePath = Configuration.getString(prefix + "." + PAR_TOPO_FILEPATH);
+        topoFilePath = Configuration.getString("TOPO_FILEPATH");
         layers = Configuration.getInt(prefix + "." + PAR_LAYERS);
         // init groups
         String[] temp_groups = Configuration.getString(prefix + "." + PAR_GROUPS).split(",");
@@ -58,13 +57,13 @@ public class ETreeLogicalTopology extends WireGraph {
         ArrayList<Integer> lastNodeIndexes = new ArrayList<>() {{
                 for (int i = 0; i < n; i++) add(i);
             }};
-        // init 0st layer
+
+        // This variable is useless, just for debugging
         ArrayList<ArrayList<Integer>> layersNodeID = new ArrayList<>();
 
         // gets the grouping result int the 0st layer
-        ArrayList<ArrayList<Integer>> res = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> res;
         for (int layer = 0; layer < layers; layer++) {
-            System.out.println(layer);
             layersNodeID.add(new ArrayList<>(lastNodeIndexes));
             // gets the grouping result for the current layer
             res = TopoUtil.getGraphPartitionResult(graph, lastNodeIndexes, groups[layer]);
@@ -84,7 +83,7 @@ public class ETreeLogicalTopology extends WireGraph {
             }
         }
 
-        /** ---------- debug output -------------
+        /* ---------- debug output -------------
         for (ArrayList<Integer> temp : layersNodeID) {
             System.out.print("size " + (temp.size()) + ": ");
             for (Integer id : temp) {
@@ -109,8 +108,5 @@ public class ETreeLogicalTopology extends WireGraph {
             System.out.println();
         }
         /*---------- debug finished --------- */
-
-        // set ETreeLearningProtocol's layersNodeID
-        ETreeLearningProtocol.setLayersNodeID(layersNodeID);
     }
 }

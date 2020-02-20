@@ -104,7 +104,7 @@ public class TopoUtil {
     }
 
     /**
-     * Returns the shortest path from node to node
+     * Returns the shortest path from node to node.
      * @param graph
      * @return
      */
@@ -112,7 +112,7 @@ public class TopoUtil {
         int[][] minDelayMatrix = new int[graph.length][graph.length];
         for (int i = 0; i < graph.length; i++)
             for (int j = 0; j < graph.length; j++)
-                minDelayMatrix[i][j] = Integer.MAX_VALUE;
+                minDelayMatrix[i][j] = i == j ? 0 : Integer.MAX_VALUE;
 
         for (int nodeIndex = 0; nodeIndex < graph.length; nodeIndex++) {
             int[] singleNodeDelayArray = getSingelNodeMinDelay(graph, nodeIndex);
@@ -300,19 +300,5 @@ public class TopoUtil {
             // System.out.println(finalClusterList.get(i));
         }
         return clusterList;
-    }
-
-    public static void main(String[] args) {
-        int n = 1000;
-        int[][] g = getGraph(n, "/Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data1000.in");
-        ArrayList<Integer> node = new ArrayList<>();
-        for (int i = 0; i < n; i++) node.add(i);
-
-        ArrayList<ArrayList<Integer>> res = getGraphPartitionResult(g, node, 1.0f);
-        int sum = 0;
-        for (ArrayList<Integer> i : res) {
-            sum += i.size();
-        }
-        System.out.println("Size: " + sum);
     }
 }
