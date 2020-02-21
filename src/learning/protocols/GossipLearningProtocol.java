@@ -5,6 +5,7 @@ import learning.interfaces.LearningProtocol;
 import learning.interfaces.Model;
 import learning.interfaces.ModelHolder;
 import learning.main.Main;
+import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
 import learning.modelHolders.BoundedModelHolder;
 import learning.models.LogisticRegression;
@@ -15,6 +16,7 @@ import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.core.Protocol;
+import peersim.edsim.EDSimulator;
 
 /**
  * @author sshpark
@@ -24,13 +26,11 @@ public class GossipLearningProtocol extends AbstractProtocol {
     private final static String PAR_MODELHOLDERNAME = "modelHolderName";
     private final static String PAR_MODELNAME = "modelName";
     private final static String PAR_COMPRESS = "compress";
-    private final static String PAR_DELTAG = "deltaG";
 
     /** @hidden */
     private final String modelHolderName;
     private final String modelName;
     private final int compress;
-    private final long deltaG;
 
     private Model workerModel;
     private ModelHolder receivedModels;
@@ -39,7 +39,6 @@ public class GossipLearningProtocol extends AbstractProtocol {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
         modelName = Configuration.getString(prefix + "." + PAR_MODELNAME);
         compress = Configuration.getInt(prefix + "." + PAR_COMPRESS);
-        deltaG = Configuration.getLong(prefix + "." + PAR_DELTAG);
         init(prefix);
     }
 
@@ -48,13 +47,11 @@ public class GossipLearningProtocol extends AbstractProtocol {
      * @param prefix
      * @param modelHolderName
      * @param modelName
-     * @param deltaG
      */
-    private GossipLearningProtocol(String prefix, String modelHolderName, String modelName, int compress, long deltaG) {
+    private GossipLearningProtocol(String prefix, String modelHolderName, String modelName, int compress) {
         this.modelHolderName = modelHolderName;
         this.modelName = modelName;
         this.compress = compress;
-        this.deltaG = deltaG;
         init(prefix);
     }
 
@@ -76,10 +73,21 @@ public class GossipLearningProtocol extends AbstractProtocol {
         }
     }
 
+    @Override
+    public void processEvent(Node currentNode, int currentProtocolID, Object messageObj) {
+        this.currentNode = currentNode;
+        this.currentProtocolID = currentProtocolID;
+
+        if ( messageObj instanceof ActiveThreadMessage) {
+            activeThread();
+        } else if (messageObj instanceof ModelMessage) {
+            passiveThread((ModelMessage) messageObj);
+        }
+    }
 
     @Override
     public Object clone() {
-        return new GossipLearningProtocol(prefix, modelHolderName, modelName, compress, deltaG);
+        return new GossipLearningProtocol(prefix, modelHolderName, modelName, compress);
     }
 
     @Override
@@ -93,39 +101,26 @@ public class GossipLearningProtocol extends AbstractProtocol {
 
     @Override
     public void passiveThread(ModelMessage message) {
-        MergeableLogisticRegression model = (MergeableLogisticRegression) message.getModel(0);
-
         // merge
         workerModel = ((MergeableLogisticRegression) workerModel).aggregateDefault(message);
 
-        // update
+        // update, SGD
         for (int sampleID = 0; instances != null && sampleID < instances.size(); sampleID++) {
             // we use each samples for updating the currently processed model
             SparseVector x = instances.getInstance(sampleID);
             double y = instances.getLabel(sampleID);
             workerModel.update(x, y);
         }
+
+        // source node next update moment
+        int src = currentNode.getIndex();
+        int dest = message.getSource().getIndex();
+        EDSimulator.add(minDelayMatrix[src][dest], ActiveThreadMessage.getInstance(),
+                message.getSource(), currentProtocolID);
     }
 
     @Override
     public void computeLoss() {
-        double errs = 0.0;
-        for (int i = 0; i < Network.size(); i++) {
-            Protocol p = ((Node) Network.get(i)).getProtocol(currentProtocolID);
-            if (p instanceof LearningProtocol) {
-                LogisticRegression model = (LogisticRegression) ((LearningProtocol) p).getWorkerModel();
-                for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
-                    SparseVector testInstance = eval.getInstance(testIdx);
-                    double y = eval.getLabel(testIdx);
-                    double pred = model.predict(testInstance);
-                    errs += (y == pred) ? 0.0 : 1.0;
-                }
-            }
-        }
-        errs = errs / eval.size();
-        cycle++;
-        Main.addLoss(cycle, errs);
-        System.err.println("Cycle: "+ cycle + " Fed 0-1 error: " + errs);
     }
 
     /**

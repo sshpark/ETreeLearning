@@ -1,37 +1,34 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/gossip_100_100.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/gossip_100.txt
+TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
+DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_fed.txt
 
-LOGTIME 2000
+LOGTIME 100
 SEED 1234567890
 
 # Transport parameters
 DROP 0.0
-MINDELAY 999
-MAXDELAY 999
 
 # Overlay parameters
-NEWSCAST_CACHESIZE NETWORKSIZE/10.0
-NEWSCAST_FREQ ONLINESIZE/10.0
+NEWSCAST_CACHESIZE NETWORKSIZE
+NEWSCAST_FREQ ONLINESIZE
 
 # Learner parameters
 CAPACITY NETWORKSIZE
 DELAY_MEAN 1000
 DELAY_VAR 0
-DELTAG 1000
 
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime 360 * 1000
+simulation.endtime 10 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
 
 #-------------------- Transport layer --------------------
-protocol.transport UniformRandomTransport
-protocol.transport.mindelay MINDELAY
-protocol.transport.maxdelay MAXDELAY
+protocol.transport MinDelayTransport
 
 
 #-------------------- Connection layer --------------------
@@ -58,8 +55,7 @@ protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 protocol.learningProtocol.MergeableLogisticRegression.lambda 0.05
 
 #-------------------- Initializers --------------------
-init.overlayInit WireKOut
-init.overlayInit.k NETWORKSIZE/10.0
+init.overlayInit learning.topology.GossipLogicalTopology
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
@@ -74,13 +70,16 @@ init.instanceLoader.samplesPerNode 41
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
 
+init.setMinDelayMatrixForProtocol learning.controls.initializers.SetMinDelayMatrixForProtocol
+init.setMinDelayMatrixForProtocol.protocol learningProtocol
+
 init.learningProtocolStart learning.controls.initializers.StartGossipMessageInitializer
 init.learningProtocolStart.protocol learningProtocol
 init.learningProtocolStart.delay 0
 
 
 #-------------------- Define Init Sequence --------------------
-include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels learningProtocolStart
+include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels setMinDelayMatrixForProtocol learningProtocolStart
 
 
 #-------------------- Observers --------------------

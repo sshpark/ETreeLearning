@@ -6,7 +6,6 @@ import learning.interfaces.ModelHolder;
 import learning.main.Main;
 import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
-import learning.messages.OnlineSessionFollowerActiveThreadMessage;
 import learning.modelHolders.BoundedModelHolder;
 import learning.models.MergeableLogisticRegression;
 import learning.utils.SparseVector;
@@ -21,27 +20,23 @@ import peersim.edsim.EDSimulator;
  * @date 30/1/2020
  */
 public class FederatedLearningProtocol extends AbstractProtocol {
-
     private final static String PAR_MODELHOLDERNAME = "modelHolderName";
     private final static String PAR_MODELNAME = "modelName";
     private final static String PAR_COMPRESS = "compress";
-    private final static String PAR_DELTAF = "deltaF";
 
     /** @hidden */
     private final String modelHolderName;
     private final String modelName;
     private final int compress;
-    private final long deltaF;
 
     private Model workerModel;
     private ModelHolder receivedModels;
-    private int masterID;
+    private static int masterID;
 
     public FederatedLearningProtocol(String prefix) {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
         modelName = Configuration.getString(prefix + "." + PAR_MODELNAME);
         compress = Configuration.getInt(prefix + "." + PAR_COMPRESS);
-        deltaF = Configuration.getLong(prefix + "." + PAR_DELTAF);
         init(prefix);
     }
 
@@ -50,14 +45,11 @@ public class FederatedLearningProtocol extends AbstractProtocol {
      * @param prefix
      * @param modelHolderName
      * @param modelName
-     * @param deltaF
      */
-    private FederatedLearningProtocol(String prefix, String modelHolderName, String modelName,
-                                      int compress, long deltaF) {
+    private FederatedLearningProtocol(String prefix, String modelHolderName, String modelName, int compress) {
         this.modelHolderName = modelHolderName;
         this.modelName = modelName;
         this.compress = compress;
-        this.deltaF = deltaF;
         init(prefix);
     }
 
@@ -78,7 +70,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 
     @Override
     public Object clone() {
-        return new FederatedLearningProtocol(prefix, modelHolderName, modelName, compress, deltaF);
+        return new FederatedLearningProtocol(prefix, modelHolderName, modelName, compress);
     }
 
 
@@ -87,74 +79,69 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         this.currentNode = currentNode;
         this.currentProtocolID = currentProtocolID;
 
-        if ( messageObj instanceof ActiveThreadMessage ||
-                (messageObj instanceof OnlineSessionFollowerActiveThreadMessage &&
-                        ((OnlineSessionFollowerActiveThreadMessage)messageObj).sessionID == sessionID) ) {
-            if (currentNode.getID() == masterID) {
-                activeThread();
-                // After the processing we set a new alarm with a delay
-                if (!Double.isInfinite(delayMean)) {
-                    int delay = (int)(delayMean + CommonState.r.nextGaussian()*delayVar);
-                    delay = (delay > 0) ? delay : 1;
-                    // Next time of the active thread
-                    EDSimulator.add(delay, new OnlineSessionFollowerActiveThreadMessage(sessionID), currentNode, currentProtocolID);
-                }
+        if ( messageObj instanceof ActiveThreadMessage) {
+            if (currentNode.getID() != masterID) {
+                workerUpdate();
             }
         } else if (messageObj instanceof ModelMessage) {
-            passiveThread((ModelMessage) messageObj);
+            masterAggregate((ModelMessage) messageObj);
+        }
+    }
+
+    private void workerUpdate() {
+        workerModel = update(workerModel);
+
+        // compress weight
+        workerModel = ((MergeableLogisticRegression)workerModel).compressSubsampling(compress);
+
+        // send to master node
+        ModelHolder latestModelHolder = new BoundedModelHolder(1);
+        latestModelHolder.add((MergeableLogisticRegression)workerModel.clone());
+        sendTo(new ModelMessage(currentNode, latestModelHolder), Network.get(masterID));
+    }
+
+    private void masterAggregate(ModelMessage message) {
+        Model model = (MergeableLogisticRegression) message.getModel(0).clone();
+        receivedModels.add(model);
+
+        int workerNum = Network.size()-1;
+        if (receivedModels.size() == workerNum) {
+            // master node aggregate
+            workerModel = ((MergeableLogisticRegression) workerModel).aggregateDefault(receivedModels);
+            // print 0-1 error
+            computeLoss();
+            // clear receivedModels
+            receivedModels.clear();
+            // send to child node
+            for (int id = 0; id < Network.size(); id++) {
+                if (id != masterID) {
+                    Node node = Network.get(id);
+                    FederatedLearningProtocol node_pro = (FederatedLearningProtocol) node.getProtocol(currentProtocolID);
+                    // update worker model
+                    node_pro.setWorkerModel((MergeableLogisticRegression)workerModel.clone());
+
+                    EDSimulator.add(minDelayMatrix[masterID][id], ActiveThreadMessage.getInstance(),
+                            node, currentProtocolID);
+                }
+            }
         }
     }
 
 
     @Override
     public void activeThread() {
-        MergeableLogisticRegression masterModel = new MergeableLogisticRegression();
-        masterModel.init(prefix);
-//        System.out.println("cur time: " + CommonState.getTime() + " rec size: " + receivedModels.size());
-
-        // merge
-        masterModel = masterModel.aggregateDefault(receivedModels);
-        workerModel = masterModel;
-
-        // print loss
-        computeLoss();
-
-        receivedModels.clear();
-
-        // send to worker
-        for (int i = 0; i < Network.size(); i++) {
-            if (i != masterID) {
-                ModelHolder latestModelHolder = new BoundedModelHolder(1);
-                latestModelHolder.add(masterModel);
-                sendTo(new ModelMessage(currentNode, latestModelHolder), Network.get(i));
-            }
-        }
     }
-    /**
-     * Worker
-     * @param message The content of the incoming message.
-     */
+
     @Override
     public void passiveThread(ModelMessage message) {
-        MergeableLogisticRegression model = (MergeableLogisticRegression)message.getModel(0);
-
-        if (currentNode.getID() != 0) {
-            model = update(model);
-            workerModel = model;
-
-            // compress weight
-            model = model.compressSubsampling(compress);
-
-            // send to master node
-            ModelHolder latestModelHolder = new BoundedModelHolder(1);
-            latestModelHolder.add(model);
-            sendTo(new ModelMessage(currentNode, latestModelHolder), Network.get(masterID));
-        } else {
-            receivedModels.add(model);
-        }
     }
 
-    private MergeableLogisticRegression update(MergeableLogisticRegression model) {
+    /**
+     * update model
+     * @param model
+     * @return
+     */
+    private Model update(Model model) {
         // update
         for (int sampleID = 0; instances != null && sampleID < instances.size(); sampleID++) {
             // we use each samples for updating the currently processed model
@@ -184,8 +171,28 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         }
         errs = errs / eval.size();
         cycle++;
-        Main.addLoss(cycle, errs);
-        System.err.println("Cycle: "+ cycle + " Fed 0-1 error: " + errs);
+        Main.addLoss(CommonState.getTime(), errs);
+        System.err.println("Time: "+ CommonState.getTime() + " Fed 0-1 error: " + errs);
+    }
+
+    /**
+     * Set master
+     * @param id
+     */
+    public static void setMasterID(int id) {
+        masterID = id;
+    }
+
+    /**
+     *
+     * @return masterId
+     */
+    public static int getMasterID() {
+        return masterID;
+    }
+
+    public void setWorkerModel(Model workerModel) {
+        this.workerModel = workerModel;
     }
 
     /**

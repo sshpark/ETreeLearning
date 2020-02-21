@@ -6,10 +6,12 @@ import learning.controls.ChurnControl;
 import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
 import learning.messages.OnlineSessionFollowerActiveThreadMessage;
+import learning.topology.TopoUtil;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.CommonState;
 import peersim.core.Linkable;
+import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.edsim.EDSimulator;
@@ -68,6 +70,8 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
   protected int currentProtocolID = -1;
   /** @hidden */
   protected String prefix;
+
+  protected int[][] minDelayMatrix;
   
   /**
    * This method performers the deep copying of the protocol.
@@ -95,7 +99,11 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
       throw new RuntimeException("Exception has occurred in InstanceLoader!", ex);
     }
   }
-  
+
+  public void setMinDelayMatrix(int[][] minDelayMatrix) {
+    this.minDelayMatrix = minDelayMatrix;
+  }
+
   /**
    * It is a helper method as well which supports sending message
    * to a uniform random neighbor.

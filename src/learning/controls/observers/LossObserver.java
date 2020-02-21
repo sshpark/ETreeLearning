@@ -4,7 +4,6 @@ import learning.interfaces.LearningProtocol;
 import learning.main.Main;
 import learning.models.LogisticRegression;
 import learning.utils.SparseVector;
-import peersim.Simulator;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
@@ -17,15 +16,14 @@ import java.util.Set;
  * @date 28/1/2020
  */
 public class LossObserver extends PredictionObserver {
-    private long cycle = 0;
     public LossObserver(String prefix) throws Exception {
         super(prefix);
     }
+    private long cycle = 0;
 
     @Override
     public boolean execute() {
         updateGraph();
-
         Set<Integer> idxSet = generateIndices();
         double errs = 0.0;
         for (int i : idxSet) {
@@ -42,8 +40,8 @@ public class LossObserver extends PredictionObserver {
         }
         errs = errs / (eval.size() * Network.size());
         cycle++;
-        Main.addLoss(cycle, errs);
-        System.err.println("Cycle: "+ cycle + " Gossip 0-1 error: " + errs);
+        Main.addLoss(CommonState.getTime(), errs);
+        System.err.println("Time: "+ CommonState.getTime() + " Gossip 0-1 error: " + errs);
         return false;
     }
 }

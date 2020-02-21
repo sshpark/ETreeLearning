@@ -76,7 +76,7 @@ public class TopoUtil {
         boolean[] vis = new boolean[n];
         int[] dis = new int[n];
         // init dis
-        Arrays.fill(dis, Integer.MAX_VALUE);
+        for (int i = 0; i < n; i++) dis[i] = Integer.MAX_VALUE;
         Queue<Edge> que = new PriorityQueue<>();
         que.add(new Edge(start, 0));
         dis[start] = 0;
@@ -121,6 +121,43 @@ public class TopoUtil {
             }
         }
         return minDelayMatrix;
+    }
+
+    /**
+     *
+     * @param graph
+     * @param nodeIdList
+     * @param aggregationRatio percentage of the model to begin aggregating
+     * @return
+     */
+    public static int findParameterServerId(int[][] graph, ArrayList<Integer> nodeIdList, float aggregationRatio) {
+        int[][] minDelayMatrix = generateMinDelayMatrix(graph);
+
+        ArrayList<Integer> theDelaysAtAggregationRatio = new ArrayList<>();
+        int k = Math.round(nodeIdList.size() * (1 - aggregationRatio)) + 1;
+        for (int i = 0; i < nodeIdList.size(); i++) {
+            PriorityQueue<Integer> largeK = new PriorityQueue<>(k + 1);
+            for (int j = 0; j < nodeIdList.size(); j++) {
+                if (i == j) {
+                    continue;
+                }
+                largeK.add(minDelayMatrix[nodeIdList.get(i)][nodeIdList.get(j)]);
+                if (largeK.size() > k) {
+                    largeK.poll();
+                }
+            }
+            theDelaysAtAggregationRatio.add(largeK.poll());
+        }
+//        System.out.println(theDelaysAtAggregationRatio);
+        int selectedNodeId = nodeIdList.get(0);
+        int minDelay = theDelaysAtAggregationRatio.get(0);
+        for (int nodeIndex = 1; nodeIndex < theDelaysAtAggregationRatio.size(); nodeIndex++) {
+            if (theDelaysAtAggregationRatio.get(nodeIndex) < minDelay) {
+                minDelay = theDelaysAtAggregationRatio.get(nodeIndex);
+                selectedNodeId = nodeIdList.get(nodeIndex);
+            }
+        }
+        return selectedNodeId;
     }
 
     /**
@@ -287,9 +324,9 @@ public class TopoUtil {
                         newCenterNodeId = clusterList.get(i).get(j);
                     }
                 }
-                if (newCenterNodeId != clusterCenterNodeId[i]) {
-                    terminateFlag = false;
+                if (clusterCenterNodeId[i] != newCenterNodeId) {
                     clusterCenterNodeId[i] = newCenterNodeId;
+                    terminateFlag = false;
                 }
                 finalClusterCenterId = clusterCenterNodeId;
             }

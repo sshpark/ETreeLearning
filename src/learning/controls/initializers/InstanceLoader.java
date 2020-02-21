@@ -2,6 +2,7 @@ package learning.controls.initializers;
 
 import learning.DataBaseReader;
 import learning.InstanceHolder;
+import learning.controls.observers.LossObserver;
 import learning.controls.observers.PredictionObserver;
 import learning.interfaces.LearningProtocol;
 

@@ -32,7 +32,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     /** @hidden */
     private final String modelHolderName;
     private final String modelName;
-    private final String topoFilePath;
     private final int layers;
 
 
@@ -40,15 +39,12 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     private ModelHolder[] layersReceivedModels;
     private int[] aggregateRatio;
     private int[] aggregateCount;
-    private int[][] graph;
-    private int[][] minDelayMatrix;
 
 
     public ETreeLearningProtocol(String prefix) {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
         modelName = Configuration.getString(prefix + "." + PAR_MODELNAME);
         layers = Configuration.getInt(prefix + "." + PAR_LAYERS);
-        topoFilePath = Configuration.getString("TOPO_FILEPATH");
         init(prefix);
     }
 
@@ -59,11 +55,9 @@ public class ETreeLearningProtocol extends AbstractProtocol {
      * @param modelName
      * @param layers
      */
-    private ETreeLearningProtocol(String prefix, String modelHolderName, String modelName,
-                                  String topoFilePath, int layers) {
+    private ETreeLearningProtocol(String prefix, String modelHolderName, String modelName, int layers) {
         this.modelHolderName = modelHolderName;
         this.modelName = modelName;
-        this.topoFilePath = topoFilePath;
         this.layers = layers;
         init(prefix);
     }
@@ -97,9 +91,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             aggregateCount = new int[layers];
             cycle = 1;
 
-            // init minDelayMatrix
-            graph = TopoUtil.getGraph(Network.size(), topoFilePath);
-            minDelayMatrix = TopoUtil.generateMinDelayMatrix(graph);
         } catch (Exception e) {
             throw new RuntimeException("Exception occured in initialization of " + getClass().getCanonicalName() + ": " + e);
         }
@@ -109,7 +100,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     public void processEvent(Node currentNode, int currentProtocolID, Object messageObj) {
         this.currentNode = currentNode;
         this.currentProtocolID = currentProtocolID;
-
         // first layer
         if (messageObj instanceof ActiveThreadMessage) {
             int currentLayer = 0;
@@ -119,11 +109,11 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             // update model
             Model wkmodel = layersWorkerModel[currentLayer];
             wkmodel = workerUpdate(wkmodel);
-            layersWorkerModel[currentLayer] = wkmodel;
+            layersWorkerModel[currentLayer] = (MergeableLogisticRegression) wkmodel.clone();
 
             // send to next layer
             ModelHolder latestModelHolder = new BoundedModelHolder(1);
-            latestModelHolder.add(wkmodel);
+            latestModelHolder.add((MergeableLogisticRegression) wkmodel.clone());
             sendTo(new MessageUp(node, currentLayer, latestModelHolder), node.getParentNode(currentLayer));
 
         } else if (messageObj instanceof MessageUp) { // receive message from child node
@@ -140,42 +130,49 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             // current node's child node size
             int numOfChildNode = ((ETreeNode)currentNode).getChildNodeList(layer).size();
             // update layersReceivedModels
-            layersReceivedModels[layer] = receivedModel;
+            layersReceivedModels[layer] = (ModelHolder) receivedModel.clone();
 
             // judge whether to aggregate
             if (receivedModel.size() == numOfChildNode) {
                 // add worker model where from current layer and current node
                 Model workerModel = layersWorkerModel[layer];
-                receivedModel.add(workerModel);
+                receivedModel.add((MergeableLogisticRegression) workerModel.clone());
 
                 // aggregate receive model
-                workerModel = ((MergeableLogisticRegression)workerModel).aggregateDefault(receivedModel);
+                workerModel = ((MergeableLogisticRegression) workerModel).aggregateDefault(receivedModel);
                 // broadcast to its child node
                 bfs((ETreeNode) currentNode, layer, workerModel);
 
                 // after aggregate, we should update some information
-                layersWorkerModel[layer] = workerModel;
+                layersWorkerModel[layer] = (MergeableLogisticRegression) workerModel.clone();
                 aggregateCount[layer]++;
                 receivedModel.clear();
-                layersReceivedModels[layer] = receivedModel;
+                layersReceivedModels[layer] = (ModelHolder) receivedModel.clone();
 
                 // whether to send nodes to the next layer
                 if (aggregateCount[layer] % aggregateRatio[layer] == 0) {
                     if (layer != layers-1) {
                         // send to next layer
                         ModelHolder latestModelHolder = new BoundedModelHolder(1);
-                        latestModelHolder.add(workerModel);
+                        latestModelHolder.add((MergeableLogisticRegression) workerModel.clone());
                         sendTo(new MessageUp(currentNode, layer, latestModelHolder),
                                 ((ETreeNode) currentNode).getParentNode(layer));
                     } else {
                         //System.out.println("Time: " + CommonState.getTime() + ", root aggregate");
                         computeLoss(workerModel);
+
+                        EDSimulator.clearMessage();
+                        for (int i = 0; i < Network.size(); i++) {
+                            Node node = Network.get(i);
+                            // schedule starter alarm
+                            EDSimulator.add(1, ActiveThreadMessage.getInstance(), node, currentProtocolID);
+                        }
                     }
                 }
             }
 
-            // Why is this code in this location?
-            // Because if there is a model release process, you need to
+            // Why put this code in this location?
+            // Because if there is a model release process, we need to
             // wait for the process to complete before letting the leaf node start updating.
             if (layer == 1) {
                 int src = currentNode.getIndex();
@@ -215,7 +212,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         while (q.isEmpty()) {
             ETreeNode top = q.poll();
             int cnt = top.getChildNodeList(layer).size();
-
+            int temp_max_delay = 0;
             for (int i = 0; i < cnt; i++) {
                 for (Integer id : top.getChildNodeList(layer)) {
                     ETreeNode temp = (ETreeNode) Network.get(id);
@@ -223,9 +220,10 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                     ETreeLearningProtocol temp_node_pro = (ETreeLearningProtocol) temp.getProtocol(currentProtocolID);
                     temp_node_pro.setLayersWorkerModel(layer, model);
                     q.offer(temp);
-                    maxDelay = Math.max(maxDelay, minDelayMatrix[src][id]);
+                    temp_max_delay = Math.max(temp_max_delay, minDelayMatrix[src][id]);
                 }
             }
+            maxDelay += temp_max_delay;
             layer--;
         }
         // update simulation time
@@ -252,7 +250,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
     @Override
     public Object clone() {
-        return new ETreeLearningProtocol(prefix, modelHolderName, modelName, topoFilePath, layers);
+        return new ETreeLearningProtocol(prefix, modelHolderName, modelName, layers);
     }
 
     /**

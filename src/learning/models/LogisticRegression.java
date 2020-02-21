@@ -69,24 +69,25 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
   @Override
   public void update(SparseVector instance, double label) {
     double prob = getPositiveProbability(instance);
-    double err = label - prob;
+    double err = prob-label;
     age ++;
+
     lambda = 0.999*lambda;
     w.mul(1.0 - 0.01 * lambda);
     w.add(instance, -lambda * err);
-//    bias -= lambda * err;
+    bias -= lambda * err;
   }
   
   /**
    * Computes the probability that the specified instance belongs to the positive class i.e. 
-   * P(Y=1 | X=x, w) = 1 / (1 + e^(w'x + b)).
+   * P(Y=1 | X=x, w, b) = 1 / (1 + e^(-w'x - b)).
    * @param instance instance to compute the probability
    * @return positive label probability of the instance
    */
   private double getPositiveProbability(SparseVector instance){
     SparseVector ins = (SparseVector)instance.clone();
     double predict = w.mul(ins) + bias;
-    predict = Math.exp(predict) + 1.0;
+    predict = Math.exp(-predict) + 1.0;
     return 1.0 / predict;
   }
   

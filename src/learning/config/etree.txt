@@ -1,12 +1,13 @@
-NETWORKSIZE 100
+NETWORKSIZE 2000
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100_100.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_2000_layer_3.txt
+DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
-TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
-LAYERS 3
+TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data2000.in
+LAYERS 5
 
-LOGTIME 100
+LOGTIME 2000
 SEED 1234567890
 
 # Transport parameters
@@ -25,7 +26,7 @@ DELAY_VAR 0
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
 network.node learning.node.ETreeNode
-simulation.endtime 5*1000
+simulation.endtime 10 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -47,7 +48,7 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
-protocol.learningProtocol.ratios 1,2,1
+protocol.learningProtocol.ratios 1,1,1,1,1
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.trainingFile res/db/spambase_train.dat
@@ -59,7 +60,7 @@ protocol.learningProtocol.MergeableLogisticRegression.lambda 0.05
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.ETreeLogicalTopology
 init.overlayInit.layers LAYERS
-init.overlayInit.groups 2,1,1
+init.overlayInit.groups 100,50,25,1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
@@ -74,10 +75,13 @@ init.instanceLoader.samplesPerNode 41
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
 
+init.setMinDelayMatrixForProtocol learning.controls.initializers.SetMinDelayMatrixForProtocol
+init.setMinDelayMatrixForProtocol.protocol learningProtocol
+
 init.learningProtocolStart learning.controls.initializers.StartGossipMessageInitializer
 init.learningProtocolStart.protocol learningProtocol
 init.learningProtocolStart.delay 0
 
 
 #-------------------- Define Init Sequence --------------------
-include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels learningProtocolStart
+include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels setMinDelayMatrixForProtocol learningProtocolStart

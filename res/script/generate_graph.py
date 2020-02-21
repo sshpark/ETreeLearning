@@ -14,5 +14,5 @@ graph = Graph.UDAG(n, m, self_loop=False, repeated_edges=False)
 
 for edge in graph.iterate_edges():
     weight = delayMean + np.random.randn()*delayVar
-    edge.weight = weight
+    edge.weight = max(1, weight)
     test_data.input_writeln(edge) # 输出这条边，以u v w的形式
