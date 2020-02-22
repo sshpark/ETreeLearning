@@ -7,6 +7,7 @@ import learning.main.Main;
 import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
 import learning.modelHolders.BoundedModelHolder;
+import learning.models.LogisticRegression;
 import learning.models.MergeableLogisticRegression;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
@@ -78,7 +79,6 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     public void processEvent(Node currentNode, int currentProtocolID, Object messageObj) {
         this.currentNode = currentNode;
         this.currentProtocolID = currentProtocolID;
-
         if ( messageObj instanceof ActiveThreadMessage) {
             if (currentNode.getID() != masterID) {
                 workerUpdate();
@@ -160,14 +160,20 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         getTransport().send(currentNode, dst, message, currentProtocolID);
     }
 
+    private double crossEntropyLoss(double y, double[] y_pred) {
+        return y == 0.0 ? -Math.log(y_pred[0]) : -Math.log(y_pred[1]);
+    }
+
     @Override
     public void computeLoss() {
         double errs = 0.0;
+        LogisticRegression temp_model = (LogisticRegression) workerModel;
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
-            double pred = workerModel.predict(testInstance);
-            errs += (y == pred) ? 0.0 : 1.0;
+            double[] pred = temp_model.distributionForInstance(testInstance);
+//            errs += (y == pred) ? 0.0 : 1.0;
+            errs += crossEntropyLoss(y, pred)+0.01*temp_model.getWeight().norm1();
         }
         errs = errs / eval.size();
         cycle++;

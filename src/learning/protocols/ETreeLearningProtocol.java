@@ -6,9 +6,9 @@ import learning.interfaces.ModelHolder;
 import learning.main.Main;
 import learning.messages.*;
 import learning.modelHolders.BoundedModelHolder;
+import learning.models.LogisticRegression;
 import learning.models.MergeableLogisticRegression;
 import learning.node.ETreeNode;
-import learning.topology.TopoUtil;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
@@ -234,13 +234,19 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     public void computeLoss() {
     }
 
+    private double crossEntropyLoss(double y, double[] y_pred) {
+        return y == 0.0 ? -Math.log(y_pred[0]) : -Math.log(y_pred[1]);
+    }
+
     private void computeLoss(Model workerModel) {
+        LogisticRegression temp_model = (LogisticRegression) workerModel;
         double errs = 0.0;
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
-            double pred = workerModel.predict(testInstance);
-            errs += (y == pred) ? 0.0 : 1.0;
+            double[] pred = temp_model.distributionForInstance(testInstance);
+//            errs += (y == pred) ? 0.0 : 1.0;
+            errs += crossEntropyLoss(y, pred)+0.01*temp_model.getWeight().norm1();
         }
         errs = errs / eval.size();
         cycle++;
