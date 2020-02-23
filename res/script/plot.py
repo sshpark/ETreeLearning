@@ -5,17 +5,16 @@ def to_seconds(ms, position):
     return str(ms/1000) + 's'
 
 filenames = [
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_2000_layer_1.txt',
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_2000_layer_2.txt',
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_2000_layer_3.txt',
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100.txt',
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt'
 ]
-labels = ['3 layers', '4 layers', '5 layers']
-lineStyle = ['m-.', 'b-.', 'r-.']
+labels = ['Federated Learning', 'ETree Learning', '5 layers']
+lineStyle = ['b-.', 'r-.', 'm-.']
 cnt = 0
 
 for filepath in filenames:
     x = [10]
-    y = [0.4229934924078091]
+    y = [0.6931471805599446]
     with open(filepath) as file:
         for line in file:
             a, b = line.split()
@@ -24,14 +23,11 @@ for filepath in filenames:
         plt.plot(x, y, lineStyle[cnt], label=labels[cnt])
     cnt += 1
 
-plt.title("2000 nodes")
+plt.title("100 nodes")
 plt.xlabel("Simulation time")
 plt.ylabel("0-1 Error")
-
 plt.legend()
 plt.grid(True)
 plt.xscale('log')
 plt.gca().xaxis.set_major_formatter(FuncFormatter(to_seconds))
-plt.savefig('./etree_2000_layer.png', dpi=600)
-
-
+plt.savefig('./test_fed_100.png', dpi=600)

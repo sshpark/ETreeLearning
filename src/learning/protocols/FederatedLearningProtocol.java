@@ -63,7 +63,6 @@ public class FederatedLearningProtocol extends AbstractProtocol {
             workerModel = (Model)Class.forName(modelName).getConstructor().newInstance();
             workerModel.init(prefix);
 
-            masterID = 0;
         } catch (Exception e) {
             throw new RuntimeException("Exception occured in initialization of " + getClass().getCanonicalName() + ": " + e);
         }
@@ -79,6 +78,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     public void processEvent(Node currentNode, int currentProtocolID, Object messageObj) {
         this.currentNode = currentNode;
         this.currentProtocolID = currentProtocolID;
+
         if ( messageObj instanceof ActiveThreadMessage) {
             if (currentNode.getID() != masterID) {
                 workerUpdate();
@@ -89,7 +89,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     }
 
     private void workerUpdate() {
-        workerModel = update(workerModel);
+        update(workerModel);
 
         // compress weight
         workerModel = ((MergeableLogisticRegression)workerModel).compressSubsampling(compress);
@@ -106,10 +106,11 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 
         int workerNum = Network.size()-1;
         if (receivedModels.size() == workerNum) {
+            receivedModels.add((MergeableLogisticRegression) workerModel.clone());
             // master node aggregate
             workerModel = ((MergeableLogisticRegression) workerModel).aggregateDefault(receivedModels);
             // print 0-1 error
-            computeLoss();
+            computeLoss(workerModel);
             // clear receivedModels
             receivedModels.clear();
             // send to child node
@@ -161,11 +162,11 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     }
 
     private double crossEntropyLoss(double y, double[] y_pred) {
-        return y == 0.0 ? -Math.log(y_pred[0]) : -Math.log(y_pred[1]);
+        return -Math.log(y_pred[(int)y]);
     }
 
     @Override
-    public void computeLoss() {
+    public void computeLoss(Model model) {
         double errs = 0.0;
         LogisticRegression temp_model = (LogisticRegression) workerModel;
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {

@@ -59,7 +59,7 @@ public class MultipleLearningProtocol extends AbstractProtocol {
   }
 
   @Override
-  public void computeLoss() {
+  public void computeLoss(Model model) {
 
   }
 

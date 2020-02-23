@@ -1,11 +1,11 @@
-NETWORKSIZE 2000
+NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_2000_layer_3.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt
 DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
-TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data2000.in
-LAYERS 5
+TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
+LAYERS 2
 
 LOGTIME 2000
 SEED 1234567890
@@ -48,19 +48,19 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
-protocol.learningProtocol.ratios 1,1,1,1,1
+protocol.learningProtocol.ratios 1,1
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.trainingFile res/db/spambase_train.dat
 protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
 protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 
-protocol.learningProtocol.MergeableLogisticRegression.lambda 0.05
+protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.ETreeLogicalTopology
 init.overlayInit.layers LAYERS
-init.overlayInit.groups 100,50,25,1,1
+init.overlayInit.groups 1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer

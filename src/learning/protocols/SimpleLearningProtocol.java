@@ -99,7 +99,7 @@ public class SimpleLearningProtocol extends AbstractProtocol {
   }
 
   @Override
-  public void computeLoss() {
+  public void computeLoss(Model model) {
 
   }
 

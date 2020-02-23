@@ -540,6 +540,14 @@ public class SparseVector implements Serializable, Iterable<VectorEntry>, Compar
     return sum;
   }
 
+  public double norm1() {
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+      sum += Math.abs(values[i]);
+    }
+    return sum;
+  }
+
   /**
    * Normalizes the current vector (Euclidean norm).
    * @return this

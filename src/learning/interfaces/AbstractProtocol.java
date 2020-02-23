@@ -82,7 +82,7 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
   /**
    * compute loss
    */
-  public abstract void computeLoss();
+  public abstract void computeLoss(Model model);
   
   protected void init(String prefix) {
     this.prefix = prefix;

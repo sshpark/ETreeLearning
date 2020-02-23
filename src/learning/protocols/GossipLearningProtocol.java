@@ -120,7 +120,8 @@ public class GossipLearningProtocol extends AbstractProtocol {
     }
 
     @Override
-    public void computeLoss() {
+    public void computeLoss(Model model) {
+
     }
 
     /**

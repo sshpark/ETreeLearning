@@ -52,7 +52,7 @@ protocol.learningProtocol.trainingFile res/db/spambase_train.dat
 protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
 protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 
-protocol.learningProtocol.MergeableLogisticRegression.lambda 0.05
+protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.FedLogicalTopology

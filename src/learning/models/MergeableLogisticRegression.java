@@ -17,10 +17,6 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
         super();
     }
 
-    public SparseVector getWeight() {
-        return w;
-    }
-
     /**
      * Returns a new mergeable logistic regression object that initializes its variable with
      * the deep copy of the specified parameters using the super constructor.
@@ -32,7 +28,7 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
         super(w, age, lambda, numberOfClasses, bias);
     }
 
-    public Object clone(){
+    public MergeableLogisticRegression clone(){
         return new MergeableLogisticRegression(w, age, lambda, numberOfClasses, bias);
     }
 
@@ -51,24 +47,6 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
 
         return new MergeableLogisticRegression(mergedw, age, lambda, numberOfClasses, bias);
     }
-
-    /**
-     * this.w + model.w * alpha
-     * this.bias + model.bias * alpha
-     * why? Because (this) is started from (w = 0, bias = 0)
-     * @param model
-     * @param alpha
-     * @return
-     */
-    public MergeableLogisticRegression merge(final MergeableLogisticRegression model, double alpha) {
-        SparseVector mergedw = new SparseVector(w);
-        double age = Math.max(this.age, model.age);
-        double bias = this.bias + model.bias * alpha;
-        mergedw.add(model.w, alpha);
-
-        return new MergeableLogisticRegression(mergedw, age, lambda, numberOfClasses, bias);
-    }
-
 
     /**
      * Compress weight
@@ -96,21 +74,26 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
      */
     public MergeableLogisticRegression aggregateDefault(ModelHolder models) {
         double agg_age = 0.0;
-
+        double agg_lambda = Double.MAX_VALUE;
         // aggregate age
-        for (int i = 0; i < models.size(); i++)
-            agg_age = Math.max(agg_age, ((MergeableLogisticRegression)models.getModel(i)).age);
+        for (int i = 0; i < models.size(); i++) {
+            agg_age = Math.max(agg_age, ((MergeableLogisticRegression) models.getModel(i)).age);
+            agg_lambda = Math.min(agg_lambda, ((MergeableLogisticRegression) models.getModel(i)).lambda);
+        }
 
-        SparseVector temp = new SparseVector();
+        SparseVector temp_w = new SparseVector();
+        double temp_b = 0.0;
 
         for (int i = 0; i < models.size(); i++) {
             MergeableLogisticRegression model = (MergeableLogisticRegression) models.getModel(i);
-            temp = temp.add(model.w);
+            temp_w.add(model.w);
+            temp_b += model.bias;
         }
-        temp = temp.mul(1.0 / models.size());
+        temp_w.mul(1.0 / models.size());
+        temp_b /= models.size();
 
-        return new MergeableLogisticRegression(temp, agg_age, lambda, numberOfClasses, bias);
-}
+        return new MergeableLogisticRegression(temp_w, agg_age, agg_lambda, numberOfClasses, temp_b);
+    }
 
 
     /**

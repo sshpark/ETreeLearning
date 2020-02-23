@@ -100,10 +100,10 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     public void processEvent(Node currentNode, int currentProtocolID, Object messageObj) {
         this.currentNode = currentNode;
         this.currentProtocolID = currentProtocolID;
+
         // first layer
         if (messageObj instanceof ActiveThreadMessage) {
             int currentLayer = 0;
-
             ETreeNode node = (ETreeNode) currentNode;
 
             // update model
@@ -122,32 +122,27 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 //            System.out.println("current time: " + CommonState.getTime() + ", current node: " + currentNode.getID() + ", src: " + ((MessageUp) messageObj).getSource().getID()
 //            +", current layer: " + layer);
 
-            // gets the received model from current layer
-            ModelHolder receivedModel = layersReceivedModels[layer];
-
             // add model to current layer's received model
-            receivedModel.add(((MessageUp) messageObj).getModel(0));
+            layersReceivedModels[layer].add(((MessageUp) messageObj).getModel(0));
+
             // current node's child node size
             int numOfChildNode = ((ETreeNode)currentNode).getChildNodeList(layer).size();
-            // update layersReceivedModels
-            layersReceivedModels[layer] = (ModelHolder) receivedModel.clone();
 
             // judge whether to aggregate
-            if (receivedModel.size() == numOfChildNode) {
+            if (layersReceivedModels[layer].size() == numOfChildNode) {
                 // add worker model where from current layer and current node
                 Model workerModel = layersWorkerModel[layer];
-                receivedModel.add((MergeableLogisticRegression) workerModel.clone());
+                layersReceivedModels[layer].add((MergeableLogisticRegression) workerModel.clone());
 
                 // aggregate receive model
-                workerModel = ((MergeableLogisticRegression) workerModel).aggregateDefault(receivedModel);
+                workerModel = ((MergeableLogisticRegression) workerModel).aggregateDefault(layersReceivedModels[layer]);
                 // broadcast to its child node
                 bfs((ETreeNode) currentNode, layer, workerModel);
 
                 // after aggregate, we should update some information
                 layersWorkerModel[layer] = (MergeableLogisticRegression) workerModel.clone();
                 aggregateCount[layer]++;
-                receivedModel.clear();
-                layersReceivedModels[layer] = (ModelHolder) receivedModel.clone();
+                layersReceivedModels[layer].clear();
 
                 // whether to send nodes to the next layer
                 if (aggregateCount[layer] % aggregateRatio[layer] == 0) {
@@ -194,7 +189,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             double y = instances.getLabel(sampleID);
             model.update(x, y);
         }
-        return (MergeableLogisticRegression) model;
+        return (MergeableLogisticRegression) model.clone();
     }
 
     /**
@@ -230,17 +225,15 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         CommonState.setTime( CommonState.getTime() + maxDelay );
     }
 
-    @Override
-    public void computeLoss() {
-    }
 
     private double crossEntropyLoss(double y, double[] y_pred) {
-        return y == 0.0 ? -Math.log(y_pred[0]) : -Math.log(y_pred[1]);
+        return -Math.log(y_pred[(int)y]);
     }
-
-    private void computeLoss(Model workerModel) {
-        LogisticRegression temp_model = (LogisticRegression) workerModel;
+    @Override
+    public void computeLoss(Model model) {
         double errs = 0.0;
+        LogisticRegression temp_model = (LogisticRegression) model;
+
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
@@ -251,7 +244,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         errs = errs / eval.size();
         cycle++;
         Main.addLoss(CommonState.getTime(), errs);
-        System.err.println("Time: "+ CommonState.getTime() + " ETree 0-1 error: " + errs);
+        System.err.println("Time: "+ CommonState.getTime() + "Etree 0-1 error: " + errs);
     }
 
     @Override

@@ -19,7 +19,7 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
    * The learning parameter is 2 by default.
    */
   protected static final String PAR_LAMBDA = "LogisticRegression.lambda";
-  protected double lambda = 10000;
+  protected double lambda = 0.01;
 
   
   /** @hidden */
@@ -63,7 +63,7 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
   public void init(String prefix) {
     w = new SparseVector();
     age = 0.0;
-    lambda = Configuration.getDouble(prefix + "." + PAR_LAMBDA, 0.0001);
+    lambda = Configuration.getDouble(prefix + "." + PAR_LAMBDA, 0.01);
   }
 
   @Override
@@ -71,9 +71,7 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
     double prob = getPositiveProbability(instance);
     double err = prob-label;
     age ++;
-
-    lambda = 0.999*lambda;
-    w.mul(1.0 - 0.01 * lambda);
+    w.mul(1.0 - 0.1 * lambda);
     w.add(instance, -lambda * err);
     bias -= lambda * err;
   }
@@ -114,6 +112,10 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
       throw new RuntimeException("Not supported number of classes in " + getClass().getCanonicalName() + " which is " + numberOfClasses + "!");
     }
     this.numberOfClasses = numberOfClasses;
+  }
+
+  public SparseVector getWeight() {
+    return w;
   }
 
 
