@@ -1,11 +1,6 @@
 package learning.utils;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Random;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.Vector;
+import java.util.*;
 
 public class Utils {
   
@@ -320,4 +315,39 @@ public class Utils {
     }
     return mul / Math.sqrt(nA * nB);
   }
+
+  /**
+   * Returns N unduplicated numbers in a randomly specified range
+   * @param max max value in specified range
+   * @param min min value in specified range
+   * @param n Random number
+   * @return int[] Result set of random number
+   */
+  public static ArrayList<Integer> randomArray(int min,int max,int n) {
+    int len = max-min+1;
+
+    if(max < min || n > len){
+      return null;
+    }
+
+    int[] source = new int[len];
+    for (int i = min; i < min+len; i++){
+      source[i-min] = i;
+    }
+
+    ArrayList<Integer> result = new ArrayList<>();
+    Random rd = new Random();
+    int index = 0;
+    for (int i = 0; i < result.size(); i++) {
+      index = rd.nextInt(len-i);
+      result.set(i, source[index]);
+
+      int temp = source[index];
+      source[index] = source[len-1-i];
+      source[len-1-i] = temp;
+    }
+    return result;
+  }
+
+  // TODO: Adding randomArray()'s overloaded method
 }

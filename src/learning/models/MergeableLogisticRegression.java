@@ -1,12 +1,13 @@
 package learning.models;
 
-import learning.interfaces.Model;
 import learning.interfaces.ModelHolder;
+import learning.utils.Utils;
 import peersim.config.Configuration;
 import learning.interfaces.Mergeable;
 import learning.utils.SparseVector;
 
-import java.util.Random;
+import java.util.ArrayList;
+
 
 public class MergeableLogisticRegression extends LogisticRegression implements Mergeable<MergeableLogisticRegression>{
     private static final long serialVersionUID = -4465428750554412761L;
@@ -57,10 +58,10 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
         final int comprss_num = (int)(n*(compress/100.0));
         double[] compress_weight = new double[n];
         for (int i = 0; i < n; i++) compress_weight[i] = 0.0;
-        int[] indexes = randomArray(0, n-1, comprss_num);
+        ArrayList<Integer> indexes = Utils.randomArray(0, n-1, comprss_num);
 
         for (int i = 0; i < comprss_num; i++)
-            compress_weight[indexes[i]] = w.get(indexes[i]);
+            compress_weight[indexes.get(i)] = w.get(indexes.get(i));
 
         w = new SparseVector(compress_weight);
 
@@ -126,38 +127,5 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
                 agg_w[i] = sum/cnt;
         }
         return new MergeableLogisticRegression(new SparseVector(agg_w), agg_age, lambda, numberOfClasses, bias);
-    }
-
-    /**
-     * Returns N unduplicated numbers in a randomly specified range
-     * @param max max value in specified range
-     * @param min min value in specified range
-     * @param n Random number
-     * @return int[] Result set of random number
-     */
-    private int[] randomArray(int min,int max,int n) {
-        int len = max-min+1;
-
-        if(max < min || n > len){
-            return null;
-        }
-
-        int[] source = new int[len];
-        for (int i = min; i < min+len; i++){
-            source[i-min] = i;
-        }
-
-        int[] result = new int[n];
-        Random rd = new Random();
-        int index = 0;
-        for (int i = 0; i < result.length; i++) {
-            index = rd.nextInt(len-i);
-            result[i] = source[index];
-
-            int temp = source[index];
-            source[index] = source[len-1-i];
-            source[len-1-i] = temp;
-        }
-        return result;
     }
 }

@@ -21,7 +21,7 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
-
+RECV_PERCENT 0.8
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
@@ -49,6 +49,7 @@ protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
 protocol.learningProtocol.ratios 1,1
+protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.trainingFile res/db/spambase_train.dat
@@ -78,8 +79,9 @@ init.setNumberOfClassesForModels.protocol learningProtocol
 init.setMinDelayMatrixForProtocol learning.controls.initializers.SetMinDelayMatrixForProtocol
 init.setMinDelayMatrixForProtocol.protocol learningProtocol
 
-init.learningProtocolStart learning.controls.initializers.StartGossipMessageInitializer
+init.learningProtocolStart learning.controls.initializers.StartETreeMessageInitializer
 init.learningProtocolStart.protocol learningProtocol
+init.learningProtocolStart.recvPercent RECV_PERCENT
 init.learningProtocolStart.delay 0
 
 

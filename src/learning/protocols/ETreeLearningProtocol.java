@@ -28,15 +28,18 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     private final static String PAR_MODELNAME = "modelName";
     private final static String PAR_LAYERS = "layers";
     private final static String PAR_RATIOS = "ratios";
+    private static final String PAR_RECVPERCENT = "recvPercent";
 
     /** @hidden */
     private final String modelHolderName;
     private final String modelName;
     private final int layers;
+    private final double recvPercent;
 
-
+    /** useful variable */
     private MergeableLogisticRegression[] layersWorkerModel;
     private ModelHolder[] layersReceivedModels;
+    private ArrayList<Integer>[] layersReceivedID;
     private int[] aggregateRatio;
     private int[] aggregateCount;
     private static ArrayList<ArrayList<Integer>> layersNodeID;
@@ -45,6 +48,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
         modelName = Configuration.getString(prefix + "." + PAR_MODELNAME);
         layers = Configuration.getInt(prefix + "." + PAR_LAYERS);
+        recvPercent = Configuration.getDouble(prefix + "." + PAR_RECVPERCENT);
         init(prefix);
     }
 
@@ -55,10 +59,11 @@ public class ETreeLearningProtocol extends AbstractProtocol {
      * @param modelName
      * @param layers
      */
-    private ETreeLearningProtocol(String prefix, String modelHolderName, String modelName, int layers) {
+    private ETreeLearningProtocol(String prefix, String modelHolderName, String modelName, int layers, double recvPercent) {
         this.modelHolderName = modelHolderName;
         this.modelName = modelName;
         this.layers = layers;
+        this.recvPercent = recvPercent;
         init(prefix);
     }
 
@@ -89,6 +94,11 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
             // init aggregate count
             aggregateCount = new int[layers];
+
+            // init layersReceivedID
+            layersReceivedID = new ArrayList[layers];
+            for (int i = 0; i < layers; i++) layersReceivedID[i] = new ArrayList<>();
+
             cycle = 1;
         } catch (Exception e) {
             throw new RuntimeException("Exception occured in initialization of " + getClass().getCanonicalName() + ": " + e);
@@ -108,15 +118,17 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             // update model
             MergeableLogisticRegression wkmodel = layersWorkerModel[currentLayer];
             wkmodel = workerUpdate(wkmodel);
-            layersWorkerModel[currentLayer] = wkmodel.clone();
 
             // send to next layer
             ModelHolder latestModelHolder = new BoundedModelHolder(1);
-            latestModelHolder.add(wkmodel.clone());
+            latestModelHolder.add(wkmodel);
             sendTo(new MessageUp(node, currentLayer, latestModelHolder), node.getParentNode(currentLayer));
 
         } else if (messageObj instanceof MessageUp) { // receive message from child node
             int layer = ((MessageUp) messageObj).getLayer()+1;  // current layer = source layer+1
+            // If node is not selected in this round, than return
+            if (!isSelected(layer, ((MessageUp) messageObj).getSource().getIndex())) return;
+
             // current node has aggregated
             ((ETreeNode)currentNode).setLayersStatus(layer, true);
 
@@ -133,7 +145,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
                 // add worker model where from current layer and current node
                 MergeableLogisticRegression workerModel = layersWorkerModel[layer];
-                layersReceivedModels[layer].add(workerModel.clone());
+                layersReceivedModels[layer].add(workerModel);
 
                 // aggregate receive model
                 workerModel = workerModel.aggregateDefault(layersReceivedModels[layer]);
@@ -152,7 +164,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
 
                 // after aggregate, we should update some information
-                layersWorkerModel[layer] = workerModel.clone();
+                layersWorkerModel[layer] = workerModel;
                 aggregateCount[layer]++;
                 layersReceivedModels[layer].clear();
 
@@ -247,12 +259,12 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         errs = errs / eval.size();
         cycle++;
         Main.addLoss(CommonState.getTime(), errs);
-        System.err.println("Time: "+ CommonState.getTime() + " Etree 0-1 error: " + errs);
+        System.err.println("Time: "+ CommonState.getTime() + " ETree 0-1 error: " + errs);
     }
 
     @Override
     public Object clone() {
-        return new ETreeLearningProtocol(prefix, modelHolderName, modelName, layers);
+        return new ETreeLearningProtocol(prefix, modelHolderName, modelName, layers, recvPercent);
     }
 
     /**
@@ -316,5 +328,12 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
     public static void setLayersNodeID(ArrayList<ArrayList<Integer>> layersNodes) {
         layersNodeID = layersNodes;
+    }
+
+    public void setLayersReceivedID(int layer, ArrayList<Integer> layersReceivedID) {
+        this.layersReceivedID[layer] = layersReceivedID;
+    }
+    private boolean isSelected(int layer, int id) {
+        return layersReceivedID[layer].contains(id);
     }
 }
