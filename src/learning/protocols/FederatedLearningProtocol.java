@@ -30,7 +30,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     private final String modelName;
     private final int compress;
 
-    private Model workerModel;
+    private MergeableLogisticRegression workerModel;
     private ModelHolder receivedModels;
     private static int masterID;
 
@@ -60,7 +60,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
             receivedModels = (ModelHolder)Class.forName(modelHolderName).getConstructor().newInstance();
             receivedModels.init(prefix);
 
-            workerModel = (Model)Class.forName(modelName).getConstructor().newInstance();
+            workerModel = (MergeableLogisticRegression) Class.forName(modelName).getConstructor().newInstance();
             workerModel.init(prefix);
 
         } catch (Exception e) {
@@ -92,11 +92,11 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         update(workerModel);
 
         // compress weight
-        workerModel = ((MergeableLogisticRegression)workerModel).compressSubsampling(compress);
+        workerModel = workerModel.compressSubsampling(compress);
 
         // send to master node
         ModelHolder latestModelHolder = new BoundedModelHolder(1);
-        latestModelHolder.add((MergeableLogisticRegression)workerModel.clone());
+        latestModelHolder.add(workerModel.clone());
         sendTo(new ModelMessage(currentNode, latestModelHolder), Network.get(masterID));
     }
 
@@ -106,11 +106,11 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 
         int workerNum = Network.size()-1;
         if (receivedModels.size() == workerNum) {
-            receivedModels.add((MergeableLogisticRegression) workerModel.clone());
+            receivedModels.add(workerModel.clone());
             // master node aggregate
-            workerModel = ((MergeableLogisticRegression) workerModel).aggregateDefault(receivedModels);
+            workerModel = workerModel.aggregateDefault(receivedModels);
             // print 0-1 error
-            computeLoss(workerModel);
+            computeLoss();
             // clear receivedModels
             receivedModels.clear();
             // send to child node
@@ -119,7 +119,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
                     Node node = Network.get(id);
                     FederatedLearningProtocol node_pro = (FederatedLearningProtocol) node.getProtocol(currentProtocolID);
                     // update worker model
-                    node_pro.setWorkerModel((MergeableLogisticRegression)workerModel.clone());
+                    node_pro.setWorkerModel(workerModel.clone());
 
                     EDSimulator.add(minDelayMatrix[masterID][id], ActiveThreadMessage.getInstance(),
                             node, currentProtocolID);
@@ -161,25 +161,20 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         getTransport().send(currentNode, dst, message, currentProtocolID);
     }
 
-    private double crossEntropyLoss(double y, double[] y_pred) {
-        return -Math.log(y_pred[(int)y]);
-    }
-
-    @Override
-    public void computeLoss(Model model) {
+    private void computeLoss() {
         double errs = 0.0;
-        LogisticRegression temp_model = (LogisticRegression) workerModel;
+
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
-            double[] pred = temp_model.distributionForInstance(testInstance);
+            double[] pred = workerModel.distributionForInstance(testInstance);
 //            errs += (y == pred) ? 0.0 : 1.0;
-            errs += crossEntropyLoss(y, pred)+0.01*temp_model.getWeight().norm1();
+            errs += crossEntropyLoss(y, pred);
         }
         errs = errs / eval.size();
         cycle++;
         Main.addLoss(CommonState.getTime(), errs);
-        System.err.println("Time: "+ CommonState.getTime() + " Fed 0-1 error: " + errs);
+        System.err.println("Time: "+ CommonState.getTime() + " Fed loss: " + errs);
     }
 
     /**
@@ -198,7 +193,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         return masterID;
     }
 
-    public void setWorkerModel(Model workerModel) {
+    public void setWorkerModel(MergeableLogisticRegression workerModel) {
         this.workerModel = workerModel;
     }
 

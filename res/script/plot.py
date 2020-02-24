@@ -9,7 +9,7 @@ filenames = [
     '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt'
 ]
 labels = ['Federated Learning', 'ETree Learning', '5 layers']
-lineStyle = ['b-.', 'r-.', 'm-.']
+lineStyle = ['b->', 'r->', 'm-.']
 cnt = 0
 
 for filepath in filenames:
@@ -25,7 +25,7 @@ for filepath in filenames:
 
 plt.title("100 nodes")
 plt.xlabel("Simulation time")
-plt.ylabel("0-1 Error")
+plt.ylabel("loss")
 plt.legend()
 plt.grid(True)
 plt.xscale('log')

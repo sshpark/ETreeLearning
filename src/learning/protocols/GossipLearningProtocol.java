@@ -1,21 +1,15 @@
 package learning.protocols;
 
 import learning.interfaces.AbstractProtocol;
-import learning.interfaces.LearningProtocol;
 import learning.interfaces.Model;
 import learning.interfaces.ModelHolder;
-import learning.main.Main;
 import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
 import learning.modelHolders.BoundedModelHolder;
-import learning.models.LogisticRegression;
 import learning.models.MergeableLogisticRegression;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
-import peersim.core.CommonState;
-import peersim.core.Network;
 import peersim.core.Node;
-import peersim.core.Protocol;
 import peersim.edsim.EDSimulator;
 
 /**
@@ -119,8 +113,7 @@ public class GossipLearningProtocol extends AbstractProtocol {
                 message.getSource(), currentProtocolID);
     }
 
-    @Override
-    public void computeLoss(Model model) {
+    private void computeLoss(Model model) {
 
     }
 

@@ -67,8 +67,7 @@ public class TestProtocol extends AbstractProtocol {
         return new TestProtocol(prefix, modelHolderName, modelName);
     }
 
-    @Override
-    public void computeLoss(Model model) {
+    private void computeLoss(Model model) {
 
     }
 

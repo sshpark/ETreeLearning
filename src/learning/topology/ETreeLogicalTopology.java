@@ -59,6 +59,7 @@ public class ETreeLogicalTopology extends WireGraph {
             }};
 
         // This variable is useless, just for debugging
+        // It's useful now, 2020/02/24
         ArrayList<ArrayList<Integer>> layersNodeID = new ArrayList<>();
 
         // gets the grouping result int the 0st layer
@@ -82,6 +83,8 @@ public class ETreeLogicalTopology extends WireGraph {
                 }
             }
         }
+
+        ETreeLearningProtocol.setLayersNodeID(layersNodeID);
 
         /* ---------- debug output -------------
         for (ArrayList<Integer> temp : layersNodeID) {
