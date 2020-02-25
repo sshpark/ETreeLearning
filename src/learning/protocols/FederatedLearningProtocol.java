@@ -168,13 +168,23 @@ public class FederatedLearningProtocol extends AbstractProtocol {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
             double[] pred = workerModel.distributionForInstance(testInstance);
-//            errs += (y == pred) ? 0.0 : 1.0;
-            errs += crossEntropyLoss(y, pred);
+            errs += crossEntropyLoss(y, pred) + r/2 * workerModel.getWeight().square();
         }
         errs = errs / eval.size();
         cycle++;
         Main.addLoss(CommonState.getTime(), errs);
-        System.err.println("Time: "+ CommonState.getTime() + " Fed loss: " + errs);
+        System.err.print("Time: "+ CommonState.getTime() + ", Fed loss: " + errs);
+
+        // accuracy
+        errs = 0.0;
+        for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
+            SparseVector testInstance = eval.getInstance(testIdx);
+            double y = eval.getLabel(testIdx);
+            double pred = workerModel.predict(testInstance);
+            errs += (y == pred) ? 0.0 : 1.0;
+        }
+        errs = errs / eval.size();
+        System.err.println(", " + (1.0-errs));
     }
 
     /**

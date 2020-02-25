@@ -16,10 +16,11 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
   private static final long serialVersionUID = -6445114719685631031L;
   
   /**
-   * The learning parameter is 2 by default.
+   * The learning parameter is 0.01 by default.
    */
   protected static final String PAR_LAMBDA = "LogisticRegression.lambda";
   protected double lambda = 0.01;
+  protected double r = 0.1;
 
   
   /** @hidden */
@@ -44,10 +45,11 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
    * @param age model age
    * @param lambda learning parameter
    */
-  protected LogisticRegression(SparseVector w, double age, double lambda, int numberOfClasses, double bias){
+  protected LogisticRegression(SparseVector w, double age, double lambda, double r, int numberOfClasses, double bias){
     this.w = (SparseVector)w.clone();
     this.age = age;
     this.lambda = lambda;
+    this.r = r;
     this.numberOfClasses = numberOfClasses;
     this.bias = bias;
   }
@@ -56,7 +58,8 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
    * Clones the object.
    */
   public Object clone(){
-    return new LogisticRegression(w, age, lambda, numberOfClasses, bias);
+    LogisticRegression res = new LogisticRegression(w, age, lambda, r, numberOfClasses, bias);
+    return res;
   }
 
   @Override
@@ -64,14 +67,16 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
     w = new SparseVector();
     age = 0.0;
     lambda = Configuration.getDouble(prefix + "." + PAR_LAMBDA, 0.01);
+    r = Configuration.getDouble("REGULARIZATION");
   }
+
 
   @Override
   public void update(SparseVector instance, double label) {
     double prob = getPositiveProbability(instance);
     double err = prob-label;
     age ++;
-    w.mul(1.0 - 0.01 * lambda);
+    w.mul(1.0 - r * lambda);
     w.add(instance, -lambda * err);
     bias -= lambda * err;
   }

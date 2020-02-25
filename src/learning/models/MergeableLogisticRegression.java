@@ -25,12 +25,13 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
      * @param age model age
      * @param lambda learning parameter
      */
-    protected MergeableLogisticRegression(SparseVector w, double age, double lambda, int numberOfClasses, double bias){
-        super(w, age, lambda, numberOfClasses, bias);
+    protected MergeableLogisticRegression(SparseVector w, double age, double lambda, double r, int numberOfClasses, double bias){
+        super(w, age, lambda, r, numberOfClasses, bias);
     }
 
     public MergeableLogisticRegression clone(){
-        return new MergeableLogisticRegression(w, age, lambda, numberOfClasses, bias);
+        MergeableLogisticRegression res = new MergeableLogisticRegression(w, age, lambda, r, numberOfClasses, bias);
+        return res;
     }
 
     public void init(String prefix) {
@@ -46,7 +47,7 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
         mergedw.mul(0.5);
         mergedw.add(model.w, 0.5);
 
-        return new MergeableLogisticRegression(mergedw, age, lambda, numberOfClasses, bias);
+        return new MergeableLogisticRegression(mergedw, age, lambda, r, numberOfClasses, bias);
     }
 
     /**
@@ -65,7 +66,7 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
 
         w = new SparseVector(compress_weight);
 
-        return new MergeableLogisticRegression(w, age, lambda, numberOfClasses, bias);
+        return new MergeableLogisticRegression(w, age, lambda, r, numberOfClasses, bias);
     }
 
     /**
@@ -93,7 +94,7 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
         temp_w.mul(1.0 / models.size());
         temp_b /= models.size();
 
-        return new MergeableLogisticRegression(temp_w, agg_age, agg_lambda, numberOfClasses, temp_b);
+        return new MergeableLogisticRegression(temp_w, agg_age, agg_lambda, r, numberOfClasses, temp_b);
     }
 
 
@@ -126,6 +127,6 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
             if (cnt != 0)
                 agg_w[i] = sum/cnt;
         }
-        return new MergeableLogisticRegression(new SparseVector(agg_w), agg_age, lambda, numberOfClasses, bias);
+        return new MergeableLogisticRegression(new SparseVector(agg_w), agg_age, lambda, r, numberOfClasses, bias);
     }
 }

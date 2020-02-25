@@ -18,6 +18,7 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
+REGULARIZATION 0.01
 
 
 #-------------------- General Simulation Properties --------------------
@@ -52,7 +53,7 @@ protocol.learningProtocol.trainingFile res/db/spambase_train.dat
 protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
 protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
 
-protocol.learningProtocol.MergeableLogisticRegression.lambda 0.05
+protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.FedLogicalTopology

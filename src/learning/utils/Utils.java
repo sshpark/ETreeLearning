@@ -335,19 +335,40 @@ public class Utils {
       source[i-min] = i;
     }
 
-    ArrayList<Integer> result = new ArrayList<>();
+    Integer result[] = new Integer[n];
     Random rd = new Random();
-    int index = 0;
-    for (int i = 0; i < result.size(); i++) {
+    int index;
+    for (int i = 0; i < n; i++) {
       index = rd.nextInt(len-i);
-      result.set(i, source[index]);
+      result[i] = source[index];
 
       int temp = source[index];
       source[index] = source[len-1-i];
       source[len-1-i] = temp;
     }
-    return result;
+    return new ArrayList<>(Arrays.asList(result));
   }
 
-  // TODO: Adding randomArray()'s overloaded method
+  /**
+   * Returns N unduplicated numbers in a specified array
+   * @param num
+   * @param src
+   * @return
+   */
+  public static ArrayList<Integer> randomArray(int num, ArrayList<Integer> src) {
+    Integer result[] = new Integer[num];
+    Random rd = new Random();
+
+    int index;
+    int len = src.size();
+    for (int i = 0; i < num; i++) {
+      index = rd.nextInt(len-i);
+      result[i] = src.get(index);
+
+      int temp = src.get(index);
+      src.set(index, src.get(len-1-i));
+      src.set(len-1-i, temp);
+    }
+    return new ArrayList<>(Arrays.asList(result));
+  }
 }

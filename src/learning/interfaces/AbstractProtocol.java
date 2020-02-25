@@ -72,6 +72,8 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
   protected String prefix;
 
   protected int[][] minDelayMatrix;
+
+  protected double r;
   
   /**
    * This method performers the deep copying of the protocol.
@@ -83,6 +85,7 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
     this.prefix = prefix;
     delayMean = Configuration.getDouble(prefix + "." + PAR_DELAYMEAN, Double.POSITIVE_INFINITY);
     delayVar = Configuration.getDouble(prefix + "." + PAR_DELAYVAR, 1.0);
+    r = Configuration.getDouble("REGULARIZATION");
     tFile = new File(Configuration.getString(prefix + "." + PAR_TFILE));
     eFile = new File(Configuration.getString(prefix + "." + PAR_EFILE));
     readerClassName = "learning.DataBaseReader";
