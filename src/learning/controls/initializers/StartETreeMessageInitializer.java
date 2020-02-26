@@ -5,6 +5,7 @@ import learning.node.ETreeNode;
 import learning.protocols.ETreeLearningProtocol;
 import learning.utils.Utils;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
@@ -35,8 +36,9 @@ public class StartETreeMessageInitializer implements Control {
     }
 
     public boolean execute() {
-        int n = Network.size();
-        // init desriptor lists
+        // init phase
+        CommonState.setPhase(1);
+
         for (int layer = 1; layer < layers; layer++) {
             for (Integer id : layersNodeID.get(layer)) {
                 ETreeNode node = (ETreeNode) Network.get(id);

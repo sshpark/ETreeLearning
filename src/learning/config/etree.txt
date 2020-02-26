@@ -1,11 +1,11 @@
-NETWORKSIZE 100
+NETWORKSIZE 10
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_10.txt
 DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
-TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
-LAYERS 3
+TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data10.in
+LAYERS 4
 
 LOGTIME 2000
 SEED 1234567890
@@ -21,13 +21,13 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
-RECV_PERCENT 0.8
+RECV_PERCENT 1.0
 REGULARIZATION 0.01
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
 network.node learning.node.ETreeNode
-simulation.endtime 20 * 1000
+simulation.endtime 10 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -49,7 +49,7 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
-protocol.learningProtocol.ratios 1,2,1
+protocol.learningProtocol.ratios 1,1,1,1
 protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
@@ -62,7 +62,7 @@ protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.ETreeLogicalTopology
 init.overlayInit.layers LAYERS
-init.overlayInit.groups 10,1,1
+init.overlayInit.groups 4,2,1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer

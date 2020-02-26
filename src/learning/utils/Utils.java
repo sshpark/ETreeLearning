@@ -356,18 +356,19 @@ public class Utils {
    * @return
    */
   public static ArrayList<Integer> randomArray(int num, ArrayList<Integer> src) {
+    ArrayList<Integer> temp_src = new ArrayList<>(src);
     Integer result[] = new Integer[num];
     Random rd = new Random();
 
     int index;
-    int len = src.size();
+    int len = temp_src.size();
     for (int i = 0; i < num; i++) {
       index = rd.nextInt(len-i);
-      result[i] = src.get(index);
+      result[i] = temp_src.get(index);
 
-      int temp = src.get(index);
-      src.set(index, src.get(len-1-i));
-      src.set(len-1-i, temp);
+      int temp = temp_src.get(index);
+      temp_src.set(index, temp_src.get(len-1-i));
+      temp_src.set(len-1-i, temp);
     }
     return new ArrayList<>(Arrays.asList(result));
   }

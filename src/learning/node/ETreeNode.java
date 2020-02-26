@@ -16,7 +16,7 @@ public class ETreeNode extends GeneralNode {
 
     @Override
     public Object clone() {
-        ETreeNode result = null;
+        ETreeNode result;
         result=(ETreeNode) super.clone();
         int layers = Configuration.getInt("LAYERS");
         result.parentNodeID = new ArrayList<>(layers);
