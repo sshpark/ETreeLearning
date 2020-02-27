@@ -40,7 +40,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     /** useful variable */
     private MergeableLogisticRegression[] layersWorkerModel;
     private ModelHolder[] layersReceivedModels;
-    private ArrayList<Integer>[] layersReceivedID;
+    private ArrayList<Integer>[] layersSelectedID;
     private int[] aggregateRatio;
     private int[] aggregateCount;
     private static ArrayList<ArrayList<Integer>> layersNodeID;
@@ -97,8 +97,8 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             aggregateCount = new int[layers];
 
             // init layersReceivedID
-            layersReceivedID = new ArrayList[layers];
-            for (int i = 0; i < layers; i++) layersReceivedID[i] = new ArrayList<>();
+            layersSelectedID = new ArrayList[layers];
+            for (int i = 0; i < layers; i++) layersSelectedID[i] = new ArrayList<>();
 
             cycle = 1;
         } catch (Exception e) {
@@ -428,12 +428,12 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     }
 
     public void setLayersReceivedID(int layer, ArrayList<Integer> layersReceivedID) {
-        this.layersReceivedID[layer] = layersReceivedID;
+        this.layersSelectedID[layer] = layersReceivedID;
     }
     public ArrayList<Integer> getLayersReceivedID(int layer) {
-        return layersReceivedID[layer];
+        return layersSelectedID[layer];
     }
     private boolean isSelected(int layer, int id) {
-        return layersReceivedID[layer].contains(id);
+        return layersSelectedID[layer].contains(id);
     }
 }
