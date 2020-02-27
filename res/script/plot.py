@@ -5,27 +5,36 @@ def to_seconds(ms, position):
     return str(ms/1000) + 's'
 
 filenames = [
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt',
     '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100.txt',
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt'
 ]
-labels = ['Federated Learning', 'ETree Learning', '5 layers']
-lineStyle = ['b-.', 'r-.', 'm-.']
+losslabels = ['Federated Learning', 'ETree Learning']
+acclabels = ['Federated Learning accuracy', 'ETree Learning accuracy']
+lossStyle = ['b-.', 'r-.', 'm-.']
+accStyle = ['b-', 'r-', 'm-']
 cnt = 0
 
 for filepath in filenames:
     x = [10]
-    y = [0.6931471805599446]
+    loss_y = [0.6931471805599446]
+    acc_y = [0.5835140997830803]
     with open(filepath) as file:
         for line in file:
-            a, b = line.split()
+            a, b, c = line.split()
             x.append(int(a))
-            y.append(float(b))
-        plt.plot(x, y, lineStyle[cnt], mfc='none', label=labels[cnt])
+            loss_y.append(float(b))
+            acc_y.append(float(c))
+        plt.plot(x, loss_y, lossStyle[cnt] , label=losslabels[cnt])
+#         _, ax1 = plt.subplots()
+#         ax2 = ax1.twinx()
+#         ax1.plot(x, loss_y, lossStyle[cnt], label=losslabels[cnt])
+#         ax2.plot(x, acc_y, accStyle[cnt], label=acclabels[cnt])
+#         ax1.set_xlabel('Simulation time')
+#         ax1.set_ylabel('eval loss')
+#         ax2.set_ylabel('eval accuracy')
     cnt += 1
 
 plt.title("100 nodes")
-plt.xlabel("Simulation time")
-plt.ylabel("loss")
 plt.legend()
 plt.grid(True)
 # plt.xscale('log')

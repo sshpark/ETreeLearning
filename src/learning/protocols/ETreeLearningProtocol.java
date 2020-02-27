@@ -218,20 +218,19 @@ public class ETreeLearningProtocol extends AbstractProtocol {
      */
     public void computeLoss(MergeableLogisticRegression model) {
         // loss
-        double errs = 0.0;
+        double losses = 0.0;
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
             double[] pred = model.distributionForInstance(testInstance);
-            errs += crossEntropyLoss(y, pred) + r/2*model.getWeight().square();
+            losses += crossEntropyLoss(y, pred) + r/2*model.getWeight().square();
         }
-        errs = errs / eval.size();
+        losses = losses / eval.size();
         cycle++;
-        Main.addLoss(CommonState.getTime(), errs);
-        System.err.print("Time: "+ CommonState.getTime() + ", ETree 0-1 error: " + errs);
+        System.err.print("Time: "+ CommonState.getTime() + ", ETree loss: " + losses);
 
-        // accuracy
-        errs = 0.0;
+        // error rate
+        double errs = 0.0;
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
@@ -239,7 +238,8 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             errs += (y == pred) ? 0.0 : 1.0;
         }
         errs = errs / eval.size();
-        System.err.println(", " + (1.0-errs));
+        Main.addLoss(CommonState.getTime(), losses, 1-errs);
+        System.err.println(", acc: " + (1.0-errs));
     }
 
     /**

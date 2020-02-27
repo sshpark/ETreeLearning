@@ -40,7 +40,8 @@ public class LossObserver extends PredictionObserver {
         }
         errs = errs / (eval.size() * Network.size());
         cycle++;
-        Main.addLoss(CommonState.getTime(), errs);
+        // TODO: Change it when you use it in the future
+        //Main.addLoss(CommonState.getTime(), errs);
         System.err.println("Time: "+ CommonState.getTime() + " Gossip 0-1 error: " + errs);
         return false;
     }

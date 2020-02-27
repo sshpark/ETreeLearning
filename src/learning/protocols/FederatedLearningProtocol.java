@@ -85,7 +85,6 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     public void processEvent(Node currentNode, int currentProtocolID, Object messageObj) {
         this.currentNode = currentNode;
         this.currentProtocolID = currentProtocolID;
-
         if ( messageObj instanceof ActiveThreadMessage) {
             if (currentNode.getID() != masterID) {
                 workerUpdate();
@@ -115,7 +114,6 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         int workerNum = Math.max((int)((Network.size()-1)*recvPercent), 1);
 
         if (receivedModels.size() == workerNum) {
-            receivedModels.add(workerModel.clone());
             // master node aggregate
             workerModel = workerModel.aggregateDefault(receivedModels);
             // print 0-1 error
@@ -167,21 +165,20 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     }
 
     private void computeLoss() {
-        double errs = 0.0;
-
+        // loss
+        double losses = 0.0;
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
             double[] pred = workerModel.distributionForInstance(testInstance);
-            errs += crossEntropyLoss(y, pred) + r/2 * workerModel.getWeight().square();
+            losses += crossEntropyLoss(y, pred) + r/2*workerModel.getWeight().square();
         }
-        errs = errs / eval.size();
+        losses = losses / eval.size();
         cycle++;
-        Main.addLoss(CommonState.getTime(), errs);
-        System.err.print("Time: "+ CommonState.getTime() + ", Fed loss: " + errs);
+        System.err.print("Time: "+ CommonState.getTime() + ", Fed loss: " + losses);
 
-        // accuracy
-        errs = 0.0;
+        // error rate
+        double errs = 0.0;
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
@@ -189,7 +186,8 @@ public class FederatedLearningProtocol extends AbstractProtocol {
             errs += (y == pred) ? 0.0 : 1.0;
         }
         errs = errs / eval.size();
-        System.err.println(", " + (1.0-errs));
+        Main.addLoss(CommonState.getTime(), losses, 1-errs);
+        System.err.println(", acc: " + (1.0-errs));
     }
 
     /**

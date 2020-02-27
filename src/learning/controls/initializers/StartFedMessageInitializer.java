@@ -44,7 +44,8 @@ public class StartFedMessageInitializer implements Control {
                 if (i != masterId) add(i);
         }};
         FederatedLearningProtocol node_pro = (FederatedLearningProtocol) Network.get(masterId).getProtocol(pid);
-        node_pro.setSelectedID( Utils.randomArray(selectedNum, workers) );
+        ArrayList<Integer> selectedID = Utils.randomArray(selectedNum, workers);
+        node_pro.setSelectedID( selectedID );
         return false;
     }
 }
