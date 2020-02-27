@@ -9,11 +9,14 @@ import learning.messages.ModelMessage;
 import learning.modelHolders.BoundedModelHolder;
 import learning.models.MergeableLogisticRegression;
 import learning.utils.SparseVector;
+import learning.utils.Utils;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
+
+import java.util.ArrayList;
 
 /**
  * @author sshpark
@@ -23,20 +26,24 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     private final static String PAR_MODELHOLDERNAME = "modelHolderName";
     private final static String PAR_MODELNAME = "modelName";
     private final static String PAR_COMPRESS = "compress";
+    private static final String PAR_RECVPERCENT = "recvPercent";
 
     /** @hidden */
     private final String modelHolderName;
     private final String modelName;
     private final int compress;
+    private final double recvPercent;
 
     private MergeableLogisticRegression workerModel;
     private ModelHolder receivedModels;
     private static int masterID;
+    private ArrayList<Integer> selectedID;
 
     public FederatedLearningProtocol(String prefix) {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
         modelName = Configuration.getString(prefix + "." + PAR_MODELNAME);
         compress = Configuration.getInt(prefix + "." + PAR_COMPRESS);
+        recvPercent = Configuration.getDouble(prefix + "." + PAR_RECVPERCENT);
         init(prefix);
     }
 
@@ -46,10 +53,11 @@ public class FederatedLearningProtocol extends AbstractProtocol {
      * @param modelHolderName
      * @param modelName
      */
-    private FederatedLearningProtocol(String prefix, String modelHolderName, String modelName, int compress) {
+    private FederatedLearningProtocol(String prefix, String modelHolderName, String modelName, int compress, double recvPercent) {
         this.modelHolderName = modelHolderName;
         this.modelName = modelName;
         this.compress = compress;
+        this.recvPercent = recvPercent;
         init(prefix);
     }
 
@@ -69,7 +77,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 
     @Override
     public Object clone() {
-        return new FederatedLearningProtocol(prefix, modelHolderName, modelName, compress);
+        return new FederatedLearningProtocol(prefix, modelHolderName, modelName, compress, recvPercent);
     }
 
 
@@ -83,6 +91,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
                 workerUpdate();
             }
         } else if (messageObj instanceof ModelMessage) {
+            if (!selectedID.contains(((ModelMessage) messageObj).getSource().getIndex())) return;
             masterAggregate((ModelMessage) messageObj);
         }
     }
@@ -103,7 +112,8 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         Model model = (MergeableLogisticRegression) message.getModel(0).clone();
         receivedModels.add(model);
 
-        int workerNum = Network.size()-1;
+        int workerNum = Math.max((int)((Network.size()-1)*recvPercent), 1);
+
         if (receivedModels.size() == workerNum) {
             receivedModels.add(workerModel.clone());
             // master node aggregate
@@ -112,6 +122,12 @@ public class FederatedLearningProtocol extends AbstractProtocol {
             computeLoss();
             // clear receivedModels
             receivedModels.clear();
+            // reset selectedWorkers
+            ArrayList<Integer> workers = new ArrayList<>();
+            for (int i = 0; i < Network.size(); i++)
+                if (i != masterID) workers.add(i);
+            selectedID = Utils.randomArray(workerNum, workers);
+
             // send to child node
             for (int id = 0; id < Network.size(); id++) {
                 if (id != masterID) {
@@ -125,15 +141,6 @@ public class FederatedLearningProtocol extends AbstractProtocol {
                 }
             }
         }
-    }
-
-
-    @Override
-    public void activeThread() {
-    }
-
-    @Override
-    public void passiveThread(ModelMessage message) {
     }
 
     /**
@@ -204,6 +211,15 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     public void setWorkerModel(MergeableLogisticRegression workerModel) {
         this.workerModel = workerModel;
     }
+
+    @Override
+    public void activeThread() {
+    }
+
+    @Override
+    public void passiveThread(ModelMessage message) {
+    }
+
 
     /**
      * The size is always 0 or 1 meaning that we have only zero or one ModelHolder instance.
@@ -277,4 +293,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         return workerModel;
     }
 
+    public void setSelectedID(ArrayList<Integer> selectedID) {
+        this.selectedID = selectedID;
+    }
 }

@@ -43,7 +43,7 @@ public class StartETreeMessageInitializer implements Control {
             for (Integer id : layersNodeID.get(layer)) {
                 ETreeNode node = (ETreeNode) Network.get(id);
                 ArrayList<Integer> childList = new ArrayList<>(node.getChildNodeList(layer));
-                ((ETreeLearningProtocol) node.getProtocol(pid)).setLayersReceivedID(
+                ((ETreeLearningProtocol) node.getProtocol(pid)).setLayersSelectedID(
                         layer, Utils.randomArray(Math.max((int) (childList.size() * recvPercent), 1), childList)
                 );
             }

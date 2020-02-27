@@ -5,7 +5,7 @@ DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/
 
 # Network topology parameters
 TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
-LAYERS 4
+LAYERS 3
 
 LOGTIME 2000
 SEED 1234567890
@@ -49,7 +49,7 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
-protocol.learningProtocol.ratios 1,1,1,1
+protocol.learningProtocol.ratios 1,2,1
 protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
@@ -62,7 +62,7 @@ protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.ETreeLogicalTopology
 init.overlayInit.layers LAYERS
-init.overlayInit.groups 10,4,1,1
+init.overlayInit.groups 10,1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer

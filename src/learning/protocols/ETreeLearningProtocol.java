@@ -110,7 +110,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
     public void processEvent(Node currentNode, int currentProtocolID, Object messageObj) {
         this.currentNode = currentNode;
         this.currentProtocolID = currentProtocolID;
-
         // first layer
         if (messageObj instanceof ActiveThreadMessage) {
             int currentLayer = 0;
@@ -129,6 +128,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 //                    ", " + ((MessageUp) messageObj).getLayer());
 
             int layer = ((MessageUp) messageObj).getLayer()+1;  // current layer = source layer+1
+//            System.out.println("curren layer: " + layer);
             // If node is not selected in this round, than return
             if (!isSelected(layer, ((MessageUp) messageObj).getSource().getIndex())) { return; }
 
@@ -144,7 +144,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
                 // add worker model where from current layer
                 MergeableLogisticRegression workerModel = layersWorkerModel[layer];
-                layersReceivedModels[layer].add(workerModel);
+                layersReceivedModels[layer].add(workerModel.clone());
 
                 // aggregate receive model
                 workerModel = workerModel.aggregateDefault(layersReceivedModels[layer]);
@@ -158,11 +158,12 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
                 // whether to send nodes to the next layer
                 if (aggregateCount[layer] % aggregateRatio[layer] == 0) {
+//                    System.out.println(currentNode.getIndex() + " " + layer + " " + aggregateCount[layer]);
                     if (layer != layers-1) {
-                        // global max layer
-                        CommonState.setPhase( Math.max(CommonState.getPhase(), layer+1) );
                         // send to next layer
                         if (canUpMessage(layer)) {
+                            // global max layer
+                            CommonState.setPhase( Math.max(CommonState.getPhase(), layer+1) );
                             upMessageToNextLayer(layer);
                         }
                     } else {
@@ -263,7 +264,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                 return false;
             }
         }
-
+//        System.out.println("layer " + currentMaxLayer + " finished at time " + CommonState.getTime());
         // else reset status
         for (int layer = currentMaxLayer; layer > 0; layer--) {
             for (Integer id : layersNodeID.get(layer)) {
@@ -285,16 +286,14 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             ETreeNode root = (ETreeNode) Network.get(rootId);
             Queue<ETreeNode> q = new LinkedList<>();
             q.offer(root);
-
             int tempMaxDelayPath = 0;
-
             while (!q.isEmpty()) {
                 int cnt = q.size();
                 int delay = 0;
 
                 for (int i = 0; i < cnt; i++) {
                     ETreeNode top = q.poll();
-                    ArrayList<Integer> listID = ((ETreeLearningProtocol) top.getProtocol(currentProtocolID)).getLayersReceivedID(layer);
+                    ArrayList<Integer> listID = ((ETreeLearningProtocol) top.getProtocol(currentProtocolID)).getLayersSelectedID(layer);
                     for (Integer id : listID) {
                         ETreeNode temp = (ETreeNode) Network.get(id);
                         q.offer(temp);
@@ -312,11 +311,10 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                 ETreeNode node = (ETreeNode) Network.get(id);
                 ArrayList<Integer> childList = new ArrayList<>(node.getChildNodeList(layer));
                 ArrayList<Integer> selectedWorkers = Utils.randomArray(Math.max((int) (childList.size() * recvPercent), 1), childList);
-                ((ETreeLearningProtocol) node.getProtocol(currentProtocolID)).setLayersReceivedID(layer, selectedWorkers);
+                ((ETreeLearningProtocol) node.getProtocol(currentProtocolID)).setLayersSelectedID(layer, selectedWorkers);
             }
         }
         CommonState.setPhase(1);
-//        System.out.print("maxdelay: " + maxDelayPath + " ");
         CommonState.setTime( CommonState.getTime() + maxDelayPath);
     }
 
@@ -427,10 +425,10 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         layersNodeID = layersNodes;
     }
 
-    public void setLayersReceivedID(int layer, ArrayList<Integer> layersReceivedID) {
-        this.layersSelectedID[layer] = layersReceivedID;
+    public void setLayersSelectedID(int layer, ArrayList<Integer> layersSelectedID) {
+        this.layersSelectedID[layer] = layersSelectedID;
     }
-    public ArrayList<Integer> getLayersReceivedID(int layer) {
+    public ArrayList<Integer> getLayersSelectedID(int layer) {
         return layersSelectedID[layer];
     }
     private boolean isSelected(int layer, int id) {

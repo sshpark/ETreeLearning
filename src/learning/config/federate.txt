@@ -18,6 +18,7 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
+RECV_PERCENT 0.8
 REGULARIZATION 0.01
 
 
@@ -49,6 +50,7 @@ protocol.learningProtocol.compress 100
 protocol.learningProtocol.deltaF DELTAF
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
+protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.trainingFile res/db/spambase_train.dat
 protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
 protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
@@ -74,7 +76,7 @@ init.setNumberOfClassesForModels.protocol learningProtocol
 init.setMinDelayMatrixForProtocol learning.controls.initializers.SetMinDelayMatrixForProtocol
 init.setMinDelayMatrixForProtocol.protocol learningProtocol
 
-init.learningProtocolStart learning.controls.initializers.StartGossipMessageInitializer
+init.learningProtocolStart learning.controls.initializers.StartFedMessageInitializer
 init.learningProtocolStart.protocol learningProtocol
 init.learningProtocolStart.delay 0
 

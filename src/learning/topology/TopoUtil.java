@@ -112,7 +112,7 @@ public class TopoUtil {
         int[][] minDelayMatrix = new int[graph.length][graph.length];
         for (int i = 0; i < graph.length; i++)
             for (int j = 0; j < graph.length; j++)
-                minDelayMatrix[i][j] = i == j ? 0 : Integer.MAX_VALUE;
+                minDelayMatrix[i][j] = i == j ? 1 : Integer.MAX_VALUE;
 
         for (int nodeIndex = 0; nodeIndex < graph.length; nodeIndex++) {
             int[] singleNodeDelayArray = getSingelNodeMinDelay(graph, nodeIndex);
