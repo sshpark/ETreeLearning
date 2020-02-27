@@ -121,7 +121,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
             // send to next layer
             ModelHolder latestModelHolder = new BoundedModelHolder(1);
-            latestModelHolder.add(wkmodel);
+            latestModelHolder.add(wkmodel.clone());
             sendTo(new MessageUp(node, currentLayer, latestModelHolder), node.getParentNode(currentLayer));
         } else if (messageObj instanceof MessageUp) { // receive message from child node
 //            System.out.println("Time: " + CommonState.getTime() + ", current node: " + currentNode.getIndex() + ", recv from: "
@@ -130,15 +130,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
             int layer = ((MessageUp) messageObj).getLayer()+1;  // current layer = source layer+1
             // If node is not selected in this round, than return
-            if (!isSelected(layer, ((MessageUp) messageObj).getSource().getIndex())) return;
-
-            boolean flag = true;
-            for (Integer id : layersNodeID.get(layer))
-                if (!((ETreeNode) Network.get(id)).getLayersStatus(layer)) {
-                    flag = false;
-                    break;
-                }
-            if (flag) System.out.println("Time: " + CommonState.getTime() + ", " + layer + " finished");
+            if (!isSelected(layer, ((MessageUp) messageObj).getSource().getIndex())) { return; }
 
             // add model to current layer's received model
             layersReceivedModels[layer].add((MergeableLogisticRegression)((MessageUp) messageObj).getModel(0).clone());
@@ -170,10 +162,9 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                         // global max layer
                         CommonState.setPhase( Math.max(CommonState.getPhase(), layer+1) );
                         // send to next layer
-                        ModelHolder latestModelHolder = new BoundedModelHolder(1);
-                        latestModelHolder.add(workerModel.clone());
-                        sendTo(new MessageUp(currentNode, layer, latestModelHolder),
-                                ((ETreeNode) currentNode).getParentNode(layer));
+                        if (canUpMessage(layer)) {
+                            upMessageToNextLayer(layer);
+                        }
                     } else {
                         CommonState.setPhase(layers-1);
                         // output loss and accuracy
@@ -182,7 +173,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                 }
                 if (canStartedNextEpoch()) {
                     resetForNextEpoch();
-                    System.out.println("start next epoch time: " + CommonState.getTime());
+//                    System.out.println("start next epoch time: " + CommonState.getTime());
                     for (int i = 0; i < Network.size(); i++) {
                         Node node = Network.get(i);
                         // schedule starter alarm
@@ -256,9 +247,8 @@ public class ETreeLearningProtocol extends AbstractProtocol {
      * @param dst node id
      */
     private void sendTo(ModelMessage message, int dst) {
-        message.setSource(currentNode);
         Node node = Network.get(dst);
-        getTransport().send(currentNode, node, message, currentProtocolID);
+        getTransport().send(message.getSource(), node, message, currentProtocolID);
     }
 
     /**
@@ -273,7 +263,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                 return false;
             }
         }
-        System.out.println("Time: " + CommonState.getTime() + ", " + currentMaxLayer + " finished");
 
         // else reset status
         for (int layer = currentMaxLayer; layer > 0; layer--) {
@@ -284,7 +273,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         }
         return true;
     }
-    // TODO: some bugs in updating simulation time
+
     /**
      * reset status for next epoch
      */
@@ -329,6 +318,43 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         CommonState.setPhase(1);
 //        System.out.print("maxdelay: " + maxDelayPath + " ");
         CommonState.setTime( CommonState.getTime() + maxDelayPath);
+    }
+
+    /**
+     * The nodes in the same layer send the message to the next layer
+     * after the aggregation is completed.
+     * @param layer
+     * @return
+     */
+    private boolean canUpMessage(int layer) {
+        for (Integer id : layersNodeID.get(layer)) {
+            ETreeNode node = (ETreeNode) Network.get(id);
+            if (!node.getLayersStatus(layer)) return false;
+        }
+        return true;
+    }
+
+    /**
+     * send model to next layer
+     * @param layer
+     */
+    private void upMessageToNextLayer(int layer) {
+        for (Integer id : layersNodeID.get(layer)) {
+            // current node
+            ETreeNode node = (ETreeNode) Network.get(id);
+            ETreeLearningProtocol node_pro = (ETreeLearningProtocol) node.getProtocol(currentProtocolID);
+            MergeableLogisticRegression workerModel = node_pro.getLayersWorkerModel(layer);
+            // parent node
+            ETreeNode node_parent = (ETreeNode)Network.get(node.getParentNode(layer));
+            ETreeLearningProtocol node_parent_pro = (ETreeLearningProtocol) node_parent.getProtocol(currentProtocolID);
+
+            if (node_parent_pro.isSelected(layer+1, id)) {
+                // send to next layer
+                ModelHolder latestModelHolder = new BoundedModelHolder(1);
+                latestModelHolder.add(workerModel.clone());
+                sendTo(new MessageUp(node, layer, latestModelHolder), node.getParentNode(layer));
+            }
+        }
     }
 
     private MergeableLogisticRegression workerUpdate(MergeableLogisticRegression model) {

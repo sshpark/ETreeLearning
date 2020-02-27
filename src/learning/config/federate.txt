@@ -23,7 +23,7 @@ REGULARIZATION 0.01
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime 20 * 1000
+simulation.endtime 50 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 

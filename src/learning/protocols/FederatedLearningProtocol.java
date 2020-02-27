@@ -7,7 +7,6 @@ import learning.main.Main;
 import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
 import learning.modelHolders.BoundedModelHolder;
-import learning.models.LogisticRegression;
 import learning.models.MergeableLogisticRegression;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
@@ -157,8 +156,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
      * @param message
      */
     private void sendTo(ModelMessage message, Node dst) {
-        message.setSource(currentNode);
-        getTransport().send(currentNode, dst, message, currentProtocolID);
+        getTransport().send(message.getSource(), dst, message, currentProtocolID);
     }
 
     private void computeLoss() {
