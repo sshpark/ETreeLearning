@@ -3,7 +3,6 @@ package learning.models;
 import learning.interfaces.Mergeable;
 import learning.interfaces.ModelHolder;
 import learning.interfaces.ProbabilityModel;
-import learning.interfaces.SimilarityComputable;
 import learning.utils.Matrix;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
