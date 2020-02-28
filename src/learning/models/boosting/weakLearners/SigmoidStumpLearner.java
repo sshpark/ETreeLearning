@@ -253,8 +253,13 @@ public class SigmoidStumpLearner extends WeakLearner {
     }
     this.numberOfClasses = numberOfClasses; 
   }
-  
-  public String toString() {
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append("SigmoidL[Alpha=" + alpha);
     sb.append("\tEdge=" + edges.get(bestIndex));

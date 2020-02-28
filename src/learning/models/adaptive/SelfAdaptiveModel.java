@@ -154,8 +154,13 @@ public class SelfAdaptiveModel implements ErrorEstimatorModel {
     this.numberOfClasses = numberOfClasses;
     model.setNumberOfClasses(numberOfClasses);
   }
-  
-  /**
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    /**
    * Returns the estimated error plus the confidence.
    */
   public double getError() {

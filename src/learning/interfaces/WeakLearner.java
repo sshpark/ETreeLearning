@@ -43,8 +43,13 @@ public abstract class WeakLearner extends ProbabilityModel{
     Arrays.fill(uniformWeights, 1.0 / (double)getNumberOfClasses());
     update(instance, label, uniformWeights);
   }
-  
-  /**
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    /**
    * Updates the current model respect to the specified parameters.
    * @param instance training instance
    * @param label label of training instance

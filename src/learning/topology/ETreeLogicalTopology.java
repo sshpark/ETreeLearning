@@ -23,6 +23,9 @@ public class ETreeLogicalTopology extends WireGraph {
     private final static String PAR_GROUPS = "groups";
     private final int[] groups;
 
+    private static final String PAR_RECVPERCENT = "recvPercent";
+    private final double recvPercent;
+
 
     /**@hidden */
     private int[][] graph;
@@ -37,6 +40,7 @@ public class ETreeLogicalTopology extends WireGraph {
         super(prefix);
         topoFilePath = Configuration.getString("TOPO_FILEPATH");
         layers = Configuration.getInt(prefix + "." + PAR_LAYERS);
+        recvPercent = Configuration.getDouble(prefix + "." + PAR_RECVPERCENT);
         // init groups
         String[] temp_groups = Configuration.getString(prefix + "." + PAR_GROUPS).split(",");
         groups = new int[layers];
@@ -68,7 +72,7 @@ public class ETreeLogicalTopology extends WireGraph {
         for (int layer = 0; layer < layers; layer++) {
             layersNodeID.add(new ArrayList<>(lastNodeIndexes));
             // gets the grouping result for the current layer
-            res = TopoUtil.getGraphPartitionResult(graph, lastNodeIndexes, groups[layer]);
+            res = TopoUtil.getGraphPartitionResult(graph, lastNodeIndexes, recvPercent, groups[layer]);
 
             lastNodeIndexes.clear();
             for (ArrayList<Integer> group : res) {

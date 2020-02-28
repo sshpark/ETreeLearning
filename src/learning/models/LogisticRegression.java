@@ -14,7 +14,7 @@ import peersim.config.Configuration;
  */
 public class LogisticRegression extends ProbabilityModel implements SimilarityComputable<LogisticRegression> {
   private static final long serialVersionUID = -6445114719685631031L;
-  
+
   /**
    * The learning parameter is 0.01 by default.
    */
@@ -22,7 +22,7 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
   protected double lambda = 0.01;
   protected double r = 0.1;
 
-  
+
   /** @hidden */
   protected SparseVector w;
   protected double bias;
@@ -118,6 +118,9 @@ public class LogisticRegression extends ProbabilityModel implements SimilarityCo
     }
     this.numberOfClasses = numberOfClasses;
   }
+
+  @Override
+  public void setNumberOfFeatures(int numberOfFeatures) { }
 
   public SparseVector getWeight() {
     return w;

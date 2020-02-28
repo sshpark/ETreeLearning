@@ -74,6 +74,7 @@ public class MergeableLogisticRegression extends LogisticRegression implements M
      * @param models receive models
      * @return
      */
+    @Override
     public MergeableLogisticRegression aggregateDefault(ModelHolder models) {
         double agg_age = 0.0;
         double agg_lambda = Double.MAX_VALUE;

@@ -107,7 +107,12 @@ public class OneVsAllMetaClassifier extends ProbabilityModel implements Mergeabl
     }
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public OneVsAllMetaClassifier merge(OneVsAllMetaClassifier model) {
     for (int i = 0; i < classifiers.size(); i++) {
@@ -119,5 +124,10 @@ public class OneVsAllMetaClassifier extends ProbabilityModel implements Mergeabl
     }
     return this;
   }
+
+    @Override
+    public OneVsAllMetaClassifier aggregateDefault(ModelHolder models) {
+        return null;
+    }
 
 }

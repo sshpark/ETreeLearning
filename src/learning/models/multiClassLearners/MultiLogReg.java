@@ -146,4 +146,9 @@ public class MultiLogReg extends ProbabilityModel {
     }
   }
 
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
 }

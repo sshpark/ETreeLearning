@@ -40,4 +40,9 @@ public abstract class ProbabilityModel implements Model {
     }
     return maxLabelIndex;
   }
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
 }

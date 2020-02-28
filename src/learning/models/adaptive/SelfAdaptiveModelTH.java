@@ -169,8 +169,13 @@ public class SelfAdaptiveModelTH implements Model {
     model.setNumberOfClasses(numberOfClasses);
     this.numOfClasses = numberOfClasses;
   }
-  
-  /**
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    /**
    * Returns true if the model is restarted.
    * @return the model is restarted.
    */

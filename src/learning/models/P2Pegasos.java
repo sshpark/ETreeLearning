@@ -120,4 +120,9 @@ public class P2Pegasos extends ProbabilityModel implements Model, SimilarityComp
     }
     this.numberOfClasses = numberOfClasses;
   }
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
 }

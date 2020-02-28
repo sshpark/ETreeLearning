@@ -62,6 +62,7 @@ protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.ETreeLogicalTopology
 init.overlayInit.layers LAYERS
+init.overlayInit.recvPercent RECV_PERCENT
 init.overlayInit.groups 10,1,1
 init.overlayInit.protocol overlay
 

@@ -2,6 +2,7 @@ package learning.models.regression;
 
 import learning.interfaces.Mergeable;
 import learning.interfaces.Model;
+import learning.interfaces.ModelHolder;
 import learning.interfaces.SimilarityComputable;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
@@ -13,20 +14,20 @@ import peersim.config.Configuration;
  */
 public class LinearRegression implements Model, Mergeable<LinearRegression>, SimilarityComputable<LinearRegression> {
   private static final long serialVersionUID = -1468280308189482885L;
-  
+
   /**
    * The learning parameter is 0.0001 by default.
    */
   protected static final String PAR_LAMBDA = "LinearRegression.lambda";
   protected double lambda = 0.0001;
-  
+
   /** @hidden */
   private SparseVector w;
   private double bias;
   private double age;
-  
+
   private int numberOfClasses;
-  
+
   /**
    * Creates a default model with age=0 and the regression hyperplane is the 0 vector.
    */
@@ -35,7 +36,7 @@ public class LinearRegression implements Model, Mergeable<LinearRegression>, Sim
     age = 0.0;
     bias = 0.0;
   }
-  
+
   private LinearRegression(SparseVector w, double age, double lambda, int numberOfClasses, double bias){
     this.w = (SparseVector)w.clone();
     this.age = age;
@@ -43,7 +44,7 @@ public class LinearRegression implements Model, Mergeable<LinearRegression>, Sim
     this.numberOfClasses = numberOfClasses;
     this.bias = bias;
   }
-  
+
   public Object clone(){
     return new LinearRegression(w, age, lambda, numberOfClasses, bias);
   }
@@ -64,7 +65,7 @@ public class LinearRegression implements Model, Mergeable<LinearRegression>, Sim
     //inst.normalize();
     age ++;
     double err = label - predict(instance);
-    
+
     //double nu = (1.0 / age) * 0.00001;
     double nu = 1.0 / (lambda * age);
     w.mul(1.0 - nu * lambda);
@@ -95,7 +96,12 @@ public class LinearRegression implements Model, Mergeable<LinearRegression>, Sim
     return new LinearRegression(mergedw, age, lambda, numberOfClasses, bias);
   }
 
-  @Override
+    @Override
+    public LinearRegression aggregateDefault(ModelHolder models) {
+        return null;
+    }
+
+    @Override
   public int getNumberOfClasses() {
     return numberOfClasses;
   }
@@ -104,7 +110,12 @@ public class LinearRegression implements Model, Mergeable<LinearRegression>, Sim
   public void setNumberOfClasses(int numberOfClasses) {
     this.numberOfClasses = numberOfClasses;
   }
-  
+
+  @Override
+  public void setNumberOfFeatures(int numberOfFeatures) {
+
+  }
+
   public double getLambda() {
     return lambda;
   }

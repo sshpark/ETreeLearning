@@ -1,5 +1,6 @@
 package learning.models;
 
+import learning.interfaces.ModelHolder;
 import peersim.config.Configuration;
 import learning.interfaces.Mergeable;
 import learning.utils.SparseVector;
@@ -37,8 +38,13 @@ public class MergeablePegasos extends P2Pegasos implements Mergeable<MergeablePe
     super.init(prefix);
     lambda = Configuration.getDouble(prefix + "." + PAR_LAMBDA, 0.0001);
   }
-  
-  /**
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    /**
    * In linear case the merge is the averaging of the vectors.
    */
   @Override
@@ -51,5 +57,10 @@ public class MergeablePegasos extends P2Pegasos implements Mergeable<MergeablePe
     
     return new MergeablePegasos(mergedw, age, lambda, numberOfClasses);
   }
+
+    @Override
+    public MergeablePegasos aggregateDefault(ModelHolder models) {
+        return null;
+    }
 
 }

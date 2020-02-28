@@ -375,8 +375,13 @@ public class FilterBoost extends ProbabilityModel {
       sWeigths = new double[numberOfClasses];
     }
   }
-  
-  /**
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    /**
    * String representation of the current object.
    */
   public String toString() {

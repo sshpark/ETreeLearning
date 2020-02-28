@@ -1,13 +1,13 @@
 package learning.protocols;
 
-import learning.interfaces.AbstractProtocol;
-import learning.interfaces.Model;
-import learning.interfaces.ModelHolder;
+import learning.interfaces.*;
 import learning.main.Main;
 import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
 import learning.modelHolders.BoundedModelHolder;
+import learning.models.LogisticRegression;
 import learning.models.MergeableLogisticRegression;
+import learning.models.SoftmaxRegression;
 import learning.utils.SparseVector;
 import learning.utils.Utils;
 import peersim.config.Configuration;
@@ -34,7 +34,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     private final int compress;
     private final double recvPercent;
 
-    private MergeableLogisticRegression workerModel;
+    private Model workerModel;
     private ModelHolder receivedModels;
     private static int masterID;
     private ArrayList<Integer> selectedID;
@@ -98,12 +98,9 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     private void workerUpdate() {
         update(workerModel);
 
-        // compress weight
-        workerModel = workerModel.compressSubsampling(compress);
-
         // send to master node
         ModelHolder latestModelHolder = new BoundedModelHolder(1);
-        latestModelHolder.add(workerModel.clone());
+        latestModelHolder.add((Model) workerModel.clone());
         sendTo(new ModelMessage(currentNode, latestModelHolder), Network.get(masterID));
     }
 
@@ -115,7 +112,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 
         if (receivedModels.size() == workerNum) {
             // master node aggregate
-            workerModel = workerModel.aggregateDefault(receivedModels);
+            workerModel = ((Mergeable)workerModel).aggregateDefault(receivedModels);
             // print 0-1 error
             computeLoss();
             // clear receivedModels
@@ -132,7 +129,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
                     Node node = Network.get(id);
                     FederatedLearningProtocol node_pro = (FederatedLearningProtocol) node.getProtocol(currentProtocolID);
                     // update worker model
-                    node_pro.setWorkerModel(workerModel.clone());
+                    node_pro.setWorkerModel((Model)workerModel.clone());
 
                     EDSimulator.add(minDelayMatrix[masterID][id], ActiveThreadMessage.getInstance(),
                             node, currentProtocolID);
@@ -170,8 +167,10 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
             SparseVector testInstance = eval.getInstance(testIdx);
             double y = eval.getLabel(testIdx);
-            double[] pred = workerModel.distributionForInstance(testInstance);
-            losses += crossEntropyLoss(y, pred) + r/2*workerModel.getWeight().square();
+            double[] pred = ((ProbabilityModel)workerModel).distributionForInstance(testInstance);
+            losses += crossEntropyLoss(y, pred);
+
+            if (workerModel instanceof LogisticRegression) losses += r/2*((LogisticRegression)workerModel).getWeight().square();
         }
         losses = losses / eval.size();
         cycle++;
@@ -206,7 +205,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         return masterID;
     }
 
-    public void setWorkerModel(MergeableLogisticRegression workerModel) {
+    public void setWorkerModel(Model workerModel) {
         this.workerModel = workerModel;
     }
 

@@ -63,7 +63,12 @@ public class SequentialLearner extends WeakLearner {
     }
   }
 
-  @Override
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    @Override
   public Object clone() {
     return new SequentialLearner(this);
   }

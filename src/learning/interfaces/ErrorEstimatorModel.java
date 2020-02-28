@@ -6,4 +6,9 @@ public interface ErrorEstimatorModel extends Model {
    * @return Estimated error
    */
   public double getError();
+
+    @Override
+    default void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
 }

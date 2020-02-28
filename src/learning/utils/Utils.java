@@ -1,5 +1,8 @@
 package learning.utils;
 
+import learning.interfaces.Model;
+import learning.interfaces.ModelHolder;
+
 import java.util.*;
 
 public class Utils {

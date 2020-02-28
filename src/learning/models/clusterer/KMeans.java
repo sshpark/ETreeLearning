@@ -147,8 +147,13 @@ public class KMeans implements Model {
   public void setNumberOfClasses(int numberOfClasses) {
     
   }
-  
-  /**
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    /**
    * Prints the cluster centroids (SparseVector toString) separated by new lines.
    */
   public String toString() {
