@@ -38,7 +38,6 @@ public class FedLogicalTopology extends WireGraph {
 
         int masterId = TopoUtil.findParameterServerId(graph, nodeIdList, recvPercent);
         // set FederatedLearningProtocol's masterId
-        System.out.println(masterId);
         FederatedLearningProtocol.setMasterID(masterId);
     }
 }

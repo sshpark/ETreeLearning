@@ -2,6 +2,7 @@ package learning.utils;
 
 import learning.interfaces.Model;
 import learning.interfaces.ModelHolder;
+import peersim.core.CommonState;
 
 import java.util.*;
 
@@ -361,12 +362,11 @@ public class Utils {
   public static ArrayList<Integer> randomArray(int num, ArrayList<Integer> src) {
     ArrayList<Integer> temp_src = new ArrayList<>(src);
     Integer result[] = new Integer[num];
-    Random rd = new Random();
 
     int index;
     int len = temp_src.size();
     for (int i = 0; i < num; i++) {
-      index = rd.nextInt(len-i);
+      index = CommonState.r.nextInt(len-i);
       result[i] = temp_src.get(index);
 
       int temp = temp_src.get(index);

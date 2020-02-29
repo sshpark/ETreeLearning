@@ -134,9 +134,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
             int layer = ((MessageUp) messageObj).getLayer() + 1;  // current layer = source layer+1
 //            System.out.println("curren layer: " + layer);
             // If node is not selected in this round, than return
-            if (!isSelected(layer, ((MessageUp) messageObj).getSource().getIndex())) {
-                return;
-            }
+            if (!isSelected(layer, ((MessageUp) messageObj).getSource().getIndex())) return;
 
             // add model to current layer's received model
             layersReceivedModels[layer].add((Model) ((MessageUp) messageObj).getModel(0).clone());
@@ -150,7 +148,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
 
                 // add worker model where from current layer
                 Model workerModel = layersWorkerModel[layer];
-                layersReceivedModels[layer].add((Model) workerModel.clone());
 
                 // aggregate receive model
                 workerModel = ((Mergeable) workerModel).aggregateDefault(layersReceivedModels[layer]);
@@ -188,7 +185,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                     }
                 }
             } // finished aggregated
-
         }
     }
 
@@ -216,6 +212,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                 }
             }
             layer--;
+            if (layer == 0) break;
         }
     }
 
@@ -256,7 +253,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
      * send to specified node
      *
      * @param message
-     * @param dst node id
+     * @param dst     node id
      */
     private void sendTo(ModelMessage message, int dst) {
         Node node = Network.get(dst);
@@ -314,6 +311,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                 }
                 tempMaxDelayPath += delay;
                 layer--;
+                if (layer == 0) break;
             }
             maxDelayPath = Math.max(maxDelayPath, tempMaxDelayPath);
         }
@@ -326,7 +324,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                 ((ETreeLearningProtocol) node.getProtocol(currentProtocolID)).setLayersSelectedID(layer, selectedWorkers);
             }
         }
-        CommonState.setPhase(1);
+        CommonState.setPhase(0);
         CommonState.setTime(CommonState.getTime() + maxDelayPath);
     }
 

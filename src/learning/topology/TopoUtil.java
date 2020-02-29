@@ -1,6 +1,7 @@
 package learning.topology;
 
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -168,15 +169,14 @@ public class TopoUtil {
             ArrayList<Integer> cluster = new ArrayList<>(nodeIdList.size());
             clusterList.add(cluster);
         }
-        Random random = new Random(1234567890);
         int[] clusterCenterNodeId = new int[k];
         HashSet<Integer> hashSet = new HashSet<>();
         int[] finalClusterCenterId = new int[k];
 
         for (int i = 0; i < k; i++) {
-            int randomNodeIndex = random.nextInt(nodeIdList.size());
+            int randomNodeIndex = CommonState.r.nextInt(nodeIdList.size());
             while (hashSet.contains(randomNodeIndex)) {
-                randomNodeIndex = random.nextInt(nodeIdList.size());
+                randomNodeIndex = CommonState.r.nextInt(nodeIdList.size());
             }
             hashSet.add(randomNodeIndex);
             clusterCenterNodeId[i] = nodeIdList.get(randomNodeIndex);
@@ -241,13 +241,12 @@ public class TopoUtil {
                 ArrayList<Integer> cluster = new ArrayList<>(nodeIdList.size());
                 clusterList.add(cluster);
             }
-            Random random = new Random();
             int[] clusterCenterNodeId = new int[k];
             HashSet<Integer> hashSet = new HashSet<>();
             for (int i = 0; i < k; i++) {
-                int randomNodeIndex = random.nextInt(nodeIdList.size());
+                int randomNodeIndex = CommonState.r.nextInt(nodeIdList.size());
                 while (hashSet.contains(randomNodeIndex)) {
-                    randomNodeIndex = random.nextInt(nodeIdList.size());
+                    randomNodeIndex = CommonState.r.nextInt(nodeIdList.size());
                 }
                 hashSet.add(randomNodeIndex);
                 clusterCenterNodeId[i] = nodeIdList.get(randomNodeIndex);

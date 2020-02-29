@@ -124,6 +124,13 @@ public class FederatedLearningProtocol extends AbstractProtocol {
                 if (i != masterID) workers.add(i);
             selectedID = Utils.randomArray(workerNum, workers);
 
+            // The simulation time update here should be the same as the E-Tree
+            int delay = 0;
+            for (Integer id : selectedID) {
+                delay = Math.max(delay, minDelayMatrix[masterID][id]);
+            }
+            CommonState.setTime(CommonState.getTime() + delay);
+
             // send to child node
             for (int id = 0; id < Network.size(); id++) {
                 if (id != masterID) {
@@ -132,7 +139,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
                     // update worker model
                     node_pro.setWorkerModel((Model) workerModel.clone());
 
-                    EDSimulator.add(minDelayMatrix[masterID][id], ActiveThreadMessage.getInstance(),
+                    EDSimulator.add(0, ActiveThreadMessage.getInstance(),
                             node, currentProtocolID);
                 }
             }
