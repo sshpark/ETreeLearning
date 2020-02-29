@@ -5,8 +5,8 @@ def to_seconds(ms, position):
     return str(ms/1000) + 's'
 
 filenames = [
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt',
     '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100.txt',
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt'
 ]
 losslabels = ['Federated Learning', 'ETree Learning']
 acclabels = ['Federated Learning accuracy', 'ETree Learning accuracy']
@@ -15,9 +15,9 @@ accStyle = ['b-', 'r-', 'm-']
 cnt = 0
 
 for filepath in filenames:
-    x = [10]
-    loss_y = [0.6931471805599446]
-    acc_y = [0.5835140997830803]
+    x = []
+    loss_y = []
+    acc_y = []
     with open(filepath) as file:
         for line in file:
             a, b, c = line.split()
@@ -39,4 +39,4 @@ plt.legend()
 plt.grid(True)
 # plt.xscale('log')
 plt.gca().xaxis.set_major_formatter(FuncFormatter(to_seconds))
-plt.savefig('./test_fed_100.png', dpi=600)
+plt.savefig('./test_fed_100.png', dpi=300)

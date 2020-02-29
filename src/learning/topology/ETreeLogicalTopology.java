@@ -72,7 +72,7 @@ public class ETreeLogicalTopology extends WireGraph {
         for (int layer = 0; layer < layers; layer++) {
             layersNodeID.add(new ArrayList<>(lastNodeIndexes));
             // gets the grouping result for the current layer
-            res = TopoUtil.getGraphPartitionResult(graph, lastNodeIndexes, recvPercent, groups[layer]);
+            res = TopoUtil.getGraphPartitionResult(graph, lastNodeIndexes, groups[layer]);
 
             lastNodeIndexes.clear();
             for (ArrayList<Integer> group : res) {

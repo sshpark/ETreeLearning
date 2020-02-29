@@ -130,11 +130,11 @@ public class TopoUtil {
      * @param aggregationRatio percentage of the model to begin aggregating
      * @return
      */
-    public static int findParameterServerId(int[][] graph, ArrayList<Integer> nodeIdList, float aggregationRatio) {
+    public static int findParameterServerId(int[][] graph, ArrayList<Integer> nodeIdList, double aggregationRatio) {
         int[][] minDelayMatrix = generateMinDelayMatrix(graph);
 
         ArrayList<Integer> theDelaysAtAggregationRatio = new ArrayList<>();
-        int k = Math.round(nodeIdList.size() * (1 - aggregationRatio)) + 1;
+        int k = (int)Math.round(nodeIdList.size() * (1 - aggregationRatio)) + 1;
         for (int i = 0; i < nodeIdList.size(); i++) {
             PriorityQueue<Integer> largeK = new PriorityQueue<>(k + 1);
             for (int j = 0; j < nodeIdList.size(); j++) {
@@ -160,114 +160,73 @@ public class TopoUtil {
         return selectedNodeId;
     }
 
-    /**
-     * Returns the result of grouping, the aggregate node is the last index
-     * of ArrayList<group_num>
-     * @param graph
-     * @param nodeIdList nodes need to part
-     * @param aggregationRatio
-     * @return
-     */
-    public static ArrayList<ArrayList<Integer>> 
-    getGraphPartitionResult(int[][] graph, ArrayList<Integer> nodeIdList, float aggregationRatio) {
-        int minClusterDelay = Integer.MAX_VALUE;
-        int tmpMinClusterDelay = Integer.MAX_VALUE;
+    public static ArrayList<ArrayList<Integer>>
+    getGraphPartitionResult(int[][] graph, ArrayList<Integer> nodeIdList, int k) {
         int[][] minDelayMatrix = generateMinDelayMatrix(graph);
-        ArrayList<ArrayList<Integer>> finalClusterList = new ArrayList<>();
-        int startClusterNum = nodeIdList.size() / 10;
-        int[] finalClusterCenterId = new int[startClusterNum];
-        for (int k = startClusterNum; k < startClusterNum + 100; k = k + 10) {
-            for (int it = 0; it < 100; it++) {
-                ArrayList<ArrayList<Integer>> clusterList = new ArrayList<>(k);
-                for (int i = 0; i < k; i++) {
-                    ArrayList<Integer> cluster = new ArrayList<>(nodeIdList.size());
-                    clusterList.add(cluster);
-                }
-                Random random = new Random();
-                int[] clusterCenterNodeId = new int[k];
-                HashSet<Integer> hashSet = new HashSet<>();
-                for (int i = 0; i < k; i++) {
-                    int randomNodeIndex = random.nextInt(nodeIdList.size());
-                    while (hashSet.contains(randomNodeIndex)) {
-                        randomNodeIndex = random.nextInt(nodeIdList.size());
+        ArrayList<ArrayList<Integer>> clusterList = new ArrayList<>(3);
+        for (int i = 0; i < k; i++) {
+            ArrayList<Integer> cluster = new ArrayList<>(nodeIdList.size());
+            clusterList.add(cluster);
+        }
+        Random random = new Random(1234567890);
+        int[] clusterCenterNodeId = new int[k];
+        HashSet<Integer> hashSet = new HashSet<>();
+        int[] finalClusterCenterId = new int[k];
+
+        for (int i = 0; i < k; i++) {
+            int randomNodeIndex = random.nextInt(nodeIdList.size());
+            while (hashSet.contains(randomNodeIndex)) {
+                randomNodeIndex = random.nextInt(nodeIdList.size());
+            }
+            hashSet.add(randomNodeIndex);
+            clusterCenterNodeId[i] = nodeIdList.get(randomNodeIndex);
+        }
+        boolean terminateFlag = false;
+        while (!terminateFlag) {
+            terminateFlag = true;
+            for (int i = 0; i < k; i++) {
+                clusterList.get(i).clear();
+            }
+            for (int i = 0; i < nodeIdList.size(); i++) {
+                int nearestClusterCenter = 0;
+                int minDelay = minDelayMatrix[nodeIdList.get(i)][clusterCenterNodeId[0]];
+                for (int j = 1; j < k; j++) {
+                    if (minDelayMatrix[nodeIdList.get(i)][clusterCenterNodeId[j]] < minDelay) {
+                        nearestClusterCenter = j;
+                        minDelay = minDelayMatrix[nodeIdList.get(i)][clusterCenterNodeId[j]];
                     }
-                    hashSet.add(randomNodeIndex);
-                    clusterCenterNodeId[i] = nodeIdList.get(randomNodeIndex);
                 }
-                boolean terminateFlag = false;
-                while (!terminateFlag) {
-                    terminateFlag = true;
-                    for (int i = 0; i < k; i++) {
-                        clusterList.get(i).clear();
+                clusterList.get(nearestClusterCenter).add(nodeIdList.get(i));
+            }
+            for (int i = 0; i < k; i++) {
+                int minTotalDelay = Integer.MAX_VALUE;
+                int newCenterNodeId = clusterCenterNodeId[i];
+                for (int j = 0; j < clusterList.get(i).size(); j++) {
+                    int totalDelay = 0;
+                    for (Integer nodeId : clusterList.get(i)) {
+                        if (nodeId.equals(clusterList.get(i).get(j))) {
+                            continue;
+                        }
+                        totalDelay += minDelayMatrix[nodeId][clusterList.get(i).get(j)];
                     }
-                    for (int i = 0; i < nodeIdList.size(); i++) {
-                        int nearestClusterCenter = 0;
-                        int minDelay = minDelayMatrix[nodeIdList.get(i)][clusterCenterNodeId[0]];
-                        for (int j = 1; j < k; j++) {
-                            if (minDelayMatrix[nodeIdList.get(i)][clusterCenterNodeId[j]] < minDelay) {
-                                nearestClusterCenter = j;
-                                minDelay = minDelayMatrix[nodeIdList.get(i)][clusterCenterNodeId[j]];
-                            }
-                        }
-                        clusterList.get(nearestClusterCenter).add(nodeIdList.get(i));
+                    if (totalDelay < minTotalDelay) {
+                        minTotalDelay = totalDelay;
+                        newCenterNodeId = clusterList.get(i).get(j);
                     }
-                    int maxClusterDelay = 0;
-                    for (int i = 0; i < k; i++) {
-                        int minTotalDelay = Integer.MAX_VALUE;
-                        int newCenterNodeId = clusterCenterNodeId[i];
-                        int maxDelay = 0;
-                        int n = Math.round(nodeIdList.size() * (1 - aggregationRatio)) + 1;
-                        PriorityQueue<Integer> largeK = new PriorityQueue<>(n + 1);
-                        for (int j = 0; j < clusterList.get(i).size(); j++) {
-                            int totalDelay = 0;
-                            for (Integer nodeId : clusterList.get(i)) {
-                                if (nodeId == clusterList.get(i).get(j)) {
-                                    continue;
-                                }
-                                totalDelay += minDelayMatrix[nodeId][clusterList.get(i).get(j)];
-                                if (minDelayMatrix[nodeId][clusterList.get(i).get(j)] > maxDelay) {
-                                    maxDelay = minDelayMatrix[nodeId][clusterList.get(i).get(j)];
-                                }
-                                largeK.add(minDelayMatrix[nodeId][clusterList.get(i).get(j)]);
-                                if (largeK.size() > n) {
-                                    largeK.poll();
-                                }
-                            }
-                            if (totalDelay < minTotalDelay) {
-                                minTotalDelay = totalDelay;
-                                newCenterNodeId = clusterList.get(i).get(j);
-                            }
-                        }
-                        if (newCenterNodeId != clusterCenterNodeId[i]) {
-                            terminateFlag = false;
-                            clusterCenterNodeId[i] = newCenterNodeId;
-                        }
-                        Object tmp = largeK.poll();
-                        int tmpMaxDelay = 0;
-                        if (tmp != null) {
-                            tmpMaxDelay = (Integer) tmp;
-                        }
-                        if (tmpMaxDelay > maxClusterDelay) {
-                            maxClusterDelay = tmpMaxDelay;
-                        }
-                    }
-                    // System.out.println(maxClusterDelay);
-                    tmpMinClusterDelay = maxClusterDelay;
                 }
-                if (tmpMinClusterDelay < minClusterDelay) {
-                    minClusterDelay = tmpMinClusterDelay;
-                    // System.out.println(minClusterDelay);
-                    finalClusterList = clusterList;
-                    finalClusterCenterId = clusterCenterNodeId;
+                if (newCenterNodeId != clusterCenterNodeId[i]) {
+                    terminateFlag = false;
+                    clusterCenterNodeId[i] = newCenterNodeId;
                 }
+                finalClusterCenterId = clusterCenterNodeId;
             }
         }
         for (int i = 0; i < finalClusterCenterId.length; i++) {
             // System.out.println(finalClusterCenterId[i]);
-            finalClusterList.get(i).add(finalClusterCenterId[i]);
+            clusterList.get(i).add(finalClusterCenterId[i]);
             // System.out.println(finalClusterList.get(i));
         }
-        return finalClusterList;
+        return clusterList;
     }
 
     public static ArrayList<ArrayList<Integer>> getGraphPartitionResult(int[][] graph, ArrayList<Integer> nodeIdList, double aggregationRatio, int k) {
