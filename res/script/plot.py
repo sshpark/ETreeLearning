@@ -5,8 +5,8 @@ def to_seconds(ms, position):
     return str(ms/1000) + 's'
 
 filenames = [
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100.txt',
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt'
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_1000.txt',
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_1000.txt'
 ]
 losslabels = ['Federated Learning', 'ETree Learning']
 acclabels = ['Federated Learning accuracy', 'ETree Learning accuracy']
@@ -24,7 +24,7 @@ for filepath in filenames:
             x.append(int(a))
             loss_y.append(float(b))
             acc_y.append(float(c))
-        plt.plot(x, loss_y, lossStyle[cnt] , label=losslabels[cnt])
+        plt.plot([i+1 for i in range(len(loss_y))], acc_y, lossStyle[cnt] , label=losslabels[cnt])
 #         _, ax1 = plt.subplots()
 #         ax2 = ax1.twinx()
 #         ax1.plot(x, loss_y, lossStyle[cnt], label=losslabels[cnt])

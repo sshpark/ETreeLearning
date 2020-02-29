@@ -324,7 +324,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                 ((ETreeLearningProtocol) node.getProtocol(currentProtocolID)).setLayersSelectedID(layer, selectedWorkers);
             }
         }
-        CommonState.setPhase(0);
+        CommonState.setPhase(1);
         CommonState.setTime(CommonState.getTime() + maxDelayPath);
     }
 
