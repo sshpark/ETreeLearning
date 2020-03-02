@@ -11,7 +11,6 @@ import peersim.core.Protocol;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * The minDelayMatrix is set up for the protocol of each node
@@ -61,7 +60,9 @@ public class SetMinDelayMatrixForProtocol implements Control {
             if (filepath.contains("delay_etree")) {
                 for (int id = 0; id < Network.size(); id++) {
                     ETreeNode node = (ETreeNode) Network.get(id);
+                    ETreeNode par_node = (ETreeNode) Network.get(node.getParentNode(0));
                     fileWriter.write(minDelayMatrix[id][node.getParentNode(0)] + " ");
+                    fileWriter.write(minDelayMatrix[node.getParentNode(0)][par_node.getParentNode(1)] + " ");
                 }
             } else {
                 int masterId = FederatedLearningProtocol.getMasterID();

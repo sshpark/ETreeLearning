@@ -1,10 +1,10 @@
-NETWORKSIZE 1000
+NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_1000.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt
 DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
-TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data1000.in
+TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
 LAYERS 3
 
 LOGTIME 2000
@@ -49,7 +49,7 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
-protocol.learningProtocol.ratios 1,2,1
+protocol.learningProtocol.ratios 1,3,1
 protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
@@ -72,7 +72,7 @@ init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
 init.instanceLoader.trainingFile res/db/uciHAR_train.dat
 init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
-init.instanceLoader.samplesPerNode 8
+init.instanceLoader.samplesPerNode 73
 
 init.setParameterForModels learning.controls.initializers.SetParameterForModels
 init.setParameterForModels.protocol learningProtocol
