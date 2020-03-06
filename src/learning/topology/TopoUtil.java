@@ -1,6 +1,5 @@
 package learning.topology;
 
-import peersim.config.Configuration;
 import peersim.core.CommonState;
 
 import java.io.BufferedReader;

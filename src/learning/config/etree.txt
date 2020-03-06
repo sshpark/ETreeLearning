@@ -1,6 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200305/etree_100_3_10.txt
 DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
@@ -21,7 +21,7 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
-RECV_PERCENT 0.8
+RECV_PERCENT 1.0
 REGULARIZATION 0.01
 
 #-------------------- General Simulation Properties --------------------

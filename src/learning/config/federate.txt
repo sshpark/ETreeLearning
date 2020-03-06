@@ -1,6 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200305/fed_100.txt
 TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
 DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_fed.txt
 
@@ -18,7 +18,7 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
-RECV_PERCENT 0.8
+RECV_PERCENT 1.0
 REGULARIZATION 0.01
 
 

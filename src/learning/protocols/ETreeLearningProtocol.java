@@ -5,7 +5,6 @@ import learning.main.Main;
 import learning.messages.*;
 import learning.modelHolders.BoundedModelHolder;
 import learning.models.LogisticRegression;
-import learning.models.MergeableLogisticRegression;
 import learning.node.ETreeNode;
 import learning.utils.SparseVector;
 import learning.utils.Utils;
@@ -175,7 +174,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                         computeLoss(workerModel);
                     }
                 }
-                if (canStartedNextEpoch()) {
+                if (canStartNextEpoch()) {
                     resetForNextEpoch();
 //                    System.out.println("start next epoch time: " + CommonState.getTime());
                     for (int i = 0; i < Network.size(); i++) {
@@ -265,7 +264,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
      *
      * @return
      */
-    private boolean canStartedNextEpoch() {
+    private boolean canStartNextEpoch() {
         final int currentMaxLayer = CommonState.getPhase();
         for (Integer id : layersNodeID.get(currentMaxLayer)) {
             ETreeNode node = (ETreeNode) Network.get(id);
