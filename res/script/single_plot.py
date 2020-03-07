@@ -19,8 +19,9 @@ def plot_save(title, xlabel, cnt, flag):
         plt.plot(x, loss_y, lossStyle[cnt] , label=losslabels[cnt])
     else:
         plt.plot(loss_y, lossStyle[cnt] , label=losslabels[cnt])
+    if flag:
+        plt.gca().xaxis.set_major_formatter(FuncFormatter(to_seconds))
     plt.legend()
-
     plt.subplot(1,2,2)
     plt.title(title)
     plt.xlabel(xlabel)
@@ -36,10 +37,10 @@ def plot_save(title, xlabel, cnt, flag):
     plt.legend()
 
 filenames = [
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200306/fed_100.txt',
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200306/etree_100_5_20.txt'
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200306/single_100_iid.txt',
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200306/single_100.txt',
 ]
-losslabels = ['Federated Learning', 'E-Tree Learning', 'E-Tree Learning 30']
+losslabels = ['IID', 'Non-IID (4)', 'ETree Learning with 30']
 acclabels = ['Federated Learning accuracy', 'ETree Learning accuracy']
 lossStyle = ['b-.', 'r-.', 'm-.', 'g-.']
 accStyle = ['b-', 'r-', 'm-']
@@ -49,17 +50,19 @@ plt.figure(figsize=(12, 4))
 
 for filepath in filenames:
     x = []
+    single_y = []
     loss_y = []
     acc_y = []
     with open(filepath) as file:
         for line in file:
-            a, b, c = line.split()
+            a, b, c, d = line.split()
             x.append(int(a))
-            loss_y.append(float(b))
-            acc_y.append(float(c))
-        plot_save('100 nodes', 'Simulation time', cnt, True)
+            single_y.append(float(b))
+            loss_y.append(float(c))
+            acc_y.append(float(d))
+        plot_save('100 nodes', 'Round', cnt, False)
     cnt += 1
 
-plt.savefig('reports/20200306/E7.png', dpi=300)
+plt.savefig('reports/20200306/E8.png', dpi=600)
 
 # Simulation time

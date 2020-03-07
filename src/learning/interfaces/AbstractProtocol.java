@@ -252,7 +252,6 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
     EDSimulator.add(0, new OnlineSessionFollowerActiveThreadMessage(sessionID), node, protocol);
   }
 
-  //
   protected double crossEntropyLoss(double y, double[] y_pred) {
     // clipping
     double eps = 1e-8;
