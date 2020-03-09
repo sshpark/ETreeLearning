@@ -37,7 +37,6 @@ public class LossObserver extends PredictionObserver {
         updateGraph();
         double errs = 0.0;
         double losses = 0.0;
-        double single_loss = 0.0;
         for (int i = 0; i < Network.size(); i++) {
             Protocol p = ((Node) g.getNode(i)).getProtocol(pid);
             double temp_errs = 0.0;
@@ -54,10 +53,6 @@ public class LossObserver extends PredictionObserver {
                     temp_losses += crossEntropyLoss(y, y_pred);
                 }
             }
-            if (i == 0) {
-                single_loss = temp_losses / eval.size();
-                System.out.println("node 0, loss: " + temp_losses / eval.size() + ", acc: " + (1.0 - temp_errs / eval.size()));
-            }
             errs += temp_errs/eval.size();
             losses += temp_losses/eval.size();
         }
@@ -65,7 +60,7 @@ public class LossObserver extends PredictionObserver {
         losses /= Network.size();
         cycle++;
         // TODO: Change it when you use it in the future
-        Main.addSingleLoss(CommonState.getTime(), single_loss, losses, 1.0-errs);
+        Main.addLoss(CommonState.getTime(), losses, 1.0-errs);
         System.err.println("Time: "+ CommonState.getTime() + ", loss: " + losses + ", Accuracy: " + (1.0-errs));
         return false;
     }
