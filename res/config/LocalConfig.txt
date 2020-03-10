@@ -1,9 +1,0 @@
-ITER ${ITERATIONS}
-SEED 1234567890
-
-dbReader learning.DataBaseReader
-trainingFile ${TRAINING_DATABASE}
-evaluationFile ${EVALUATION_DATABASE}
-
-learner learning.models.LogisticRegression
-learner.LogisticRegression.lambda 0.01
