@@ -1,12 +1,12 @@
 package learning.protocols;
 
 import learning.interfaces.AbstractProtocol;
+import learning.interfaces.Mergeable;
 import learning.interfaces.Model;
 import learning.interfaces.ModelHolder;
 import learning.messages.ActiveThreadMessage;
 import learning.messages.ModelMessage;
 import learning.modelHolders.BoundedModelHolder;
-import learning.models.MergeableLogisticRegression;
 import learning.utils.SparseVector;
 import peersim.config.Configuration;
 import peersim.core.Node;
@@ -87,16 +87,15 @@ public class GossipLearningProtocol extends AbstractProtocol {
     @Override
     public void activeThread() {
         ModelHolder latestModelHolder = new BoundedModelHolder(1);
-        MergeableLogisticRegression model = (MergeableLogisticRegression) workerModel.clone();
-        latestModelHolder.add(model.compressSubsampling(compress));
+        Model model = (Model) workerModel.clone();
+        latestModelHolder.add(model);
         sendToRandomNeighbor(new ModelMessage(currentNode, latestModelHolder));
-
     }
 
     @Override
     public void passiveThread(ModelMessage message) {
         // merge
-        workerModel = ((MergeableLogisticRegression) workerModel).aggregateDefault(message);
+        workerModel = ((Mergeable) workerModel).aggregateDefault(message);
 
         // update, SGD
         for (int sampleID = 0; instances != null && sampleID < instances.size(); sampleID++) {

@@ -1,6 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200306/etree_100_6_20.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200309/etree_100_5_20_iid.txt
 DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
@@ -27,7 +27,7 @@ REGULARIZATION 0.01
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
 network.node learning.node.ETreeNode
-simulation.endtime 30 * 1000
+simulation.endtime 360 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -49,7 +49,7 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
-protocol.learningProtocol.ratios 1,6,1
+protocol.learningProtocol.ratios 1,5,1
 protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY

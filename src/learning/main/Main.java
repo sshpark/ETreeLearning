@@ -190,19 +190,11 @@ public class Main {
      * export loss to txt
      */
     private static Vector<Double> losses = new Vector<Double>();
-    private static Vector<Double> single_losses = new Vector<Double>();
     private static Vector<Double> accs = new Vector<Double>();
     private static Vector<Long> realTimes = new Vector<Long>();
 
     public static void addLoss(Long time, double loss, double acc) {
         realTimes.add(time);
-        losses.add(loss);
-        accs.add(acc);
-    }
-
-    public static void addSingleLoss(Long time, double single_loss, double loss, double acc) {
-        realTimes.add(time);
-        single_losses.add(single_loss);
         losses.add(loss);
         accs.add(acc);
     }

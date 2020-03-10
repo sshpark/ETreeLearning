@@ -1,10 +1,10 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/gossip_100.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200309/gossip_100_iid.txt
 TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
 DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_fed.txt
 
-LOGTIME 100
+LOGTIME 2000
 SEED 1234567890
 
 # Transport parameters
@@ -18,11 +18,13 @@ NEWSCAST_FREQ ONLINESIZE
 CAPACITY NETWORKSIZE
 DELAY_MEAN 1000
 DELAY_VAR 0
+RECV_PERCENT 1.0
+REGULARIZATION 0.01
 
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime 10 * 1000
+simulation.endtime 90 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -48,11 +50,11 @@ protocol.learningProtocol.compress 100
 protocol.learningProtocol.deltaG DELTAG
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
-protocol.learningProtocol.trainingFile res/db/spambase_train.dat
-protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
-protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
+protocol.learningProtocol.trainingFile res/db/uciHAR_train.dat
+protocol.learningProtocol.evaluationFile res/db/uciHAR_eval.dat
+protocol.learningProtocol.modelName learning.models.SoftmaxRegression
+protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 
-protocol.learningProtocol.MergeableLogisticRegression.lambda 0.05
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.GossipLogicalTopology
@@ -63,9 +65,9 @@ init.overlayStart.protocolID overlay
 
 init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
-init.instanceLoader.trainingFile res/db/spambase_train.dat
-init.instanceLoader.evaluationFile res/db/spambase_eval.dat
-init.instanceLoader.samplesPerNode 41
+init.instanceLoader.trainingFile res/db/uciHAR_train.dat
+init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
+init.instanceLoader.samplesPerNode 73
 
 init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
 init.setNumberOfClassesForModels.protocol learningProtocol
@@ -86,7 +88,7 @@ include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels
 control.prediction learning.controls.observers.LossObserver
 control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
 control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
-control.prediction.step LOGTIME
+control.prediction.step 400
 control.prediction.protocol learningProtocol
 control.prediction.format gpt
 
