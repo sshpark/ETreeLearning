@@ -28,7 +28,7 @@ public class FedLogicalTopology extends WireGraph {
 
     @Override
     public void wire(Graph g) {
-        ArrayList<Integer> nodeIdList = new ArrayList<>() {{
+        ArrayList<Integer> nodeIdList = new ArrayList() {{
             for (int i = 0; i < Network.size(); i++) add(i);
         }};
 

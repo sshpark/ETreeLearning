@@ -54,7 +54,7 @@ public class ETreeLogicalTopology extends WireGraph {
         // node size
         final int n = Network.size();
 
-        ArrayList<Integer> lastNodeIndexes = new ArrayList<>() {{
+        ArrayList<Integer> lastNodeIndexes = new ArrayList() {{
                 for (int i = 0; i < n; i++) add(i);
             }};
 

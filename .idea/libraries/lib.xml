@@ -1,16 +1,25 @@
 <component name="libraryTable">
   <library name="lib">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/djep-1.0.0.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/colt-1.2.0.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/jep-2.3.0.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/peersim-1.0.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-stdlib-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-test.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/peersim-extras.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/colt-1.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-stdlib-jdk8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-reflect.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-stdlib-jdk8-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-reflect-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/peersim-doclet.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-stdlib-jdk7-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/djep-1.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jep-2.3.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-test-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/peersim-1.0.5_cmp.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-stdlib-jdk7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-stdlib.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="file://$USER_HOME$/Downloads/code/src" />
-      <root url="jar://$PROJECT_DIR$/lib/peersim-extras.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

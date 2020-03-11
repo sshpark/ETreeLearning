@@ -155,7 +155,6 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                     } else {
                         //System.out.println("Time: " + CommonState.getTime() + ", root aggregate");
                         computeLoss(workerModel);
-
                         EDSimulator.clearMessage();
                         for (int i = 0; i < Network.size(); i++) {
                             Node node = Network.get(i);
