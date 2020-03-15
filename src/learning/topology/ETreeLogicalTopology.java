@@ -1,5 +1,6 @@
 package learning.topology;
 
+import learning.controls.initializers.StartETreeMessageInitializer;
 import learning.node.ETreeNode;
 import learning.protocols.ETreeLearningProtocol;
 import peersim.config.Configuration;
@@ -22,6 +23,9 @@ public class ETreeLogicalTopology extends WireGraph {
     private final static String PAR_GROUPS = "groups";
     private final int[] groups;
 
+    private static final String PAR_RECVPERCENT = "recvPercent";
+    private final double recvPercent;
+
 
     /**@hidden */
     private int[][] graph;
@@ -36,6 +40,7 @@ public class ETreeLogicalTopology extends WireGraph {
         super(prefix);
         topoFilePath = Configuration.getString("TOPO_FILEPATH");
         layers = Configuration.getInt(prefix + "." + PAR_LAYERS);
+        recvPercent = Configuration.getDouble(prefix + "." + PAR_RECVPERCENT);
         // init groups
         String[] temp_groups = Configuration.getString(prefix + "." + PAR_GROUPS).split(",");
         groups = new int[layers];
@@ -54,11 +59,12 @@ public class ETreeLogicalTopology extends WireGraph {
         // node size
         final int n = Network.size();
 
-        ArrayList<Integer> lastNodeIndexes = new ArrayList() {{
+        ArrayList<Integer> lastNodeIndexes = new ArrayList<Integer>() {{
                 for (int i = 0; i < n; i++) add(i);
             }};
 
         // This variable is useless, just for debugging
+        // It's useful now, 2020/02/24
         ArrayList<ArrayList<Integer>> layersNodeID = new ArrayList<>();
 
         // gets the grouping result int the 0st layer
@@ -82,6 +88,9 @@ public class ETreeLogicalTopology extends WireGraph {
                 }
             }
         }
+
+        ETreeLearningProtocol.setLayersNodeID(layersNodeID);
+        StartETreeMessageInitializer.setLayersNodeID(layersNodeID);
 
         /* ---------- debug output -------------
         for (ArrayList<Integer> temp : layersNodeID) {

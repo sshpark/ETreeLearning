@@ -15,4 +15,6 @@ public interface Mergeable<T extends Model> {
    * @return combined or merged model
    */
   public T merge(final T model);
+
+  public T aggregateDefault(ModelHolder models);
 }

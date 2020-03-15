@@ -1,5 +1,6 @@
 package learning.models.multiClassLearners;
 
+import learning.interfaces.ModelHolder;
 import peersim.config.Configuration;
 import learning.interfaces.Mergeable;
 import learning.utils.SparseVector;
@@ -50,8 +51,13 @@ public class MergeableMultiLogReg extends MultiLogReg implements Mergeable<Merge
     super.init(prefix);
     lambda = Configuration.getDouble(prefix + "." + PAR_LAMBDA, 0.0001);
   }
-  
-  @Override
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    @Override
   public MergeableMultiLogReg merge(MergeableMultiLogReg model) {
     MergeableMultiLogReg result = new MergeableMultiLogReg(this);
     for (int i = 0; i < numberOfClasses; i++) {
@@ -62,5 +68,10 @@ public class MergeableMultiLogReg extends MultiLogReg implements Mergeable<Merge
     result.age = Math.max(age, model.age);
     return result;
   }
+
+    @Override
+    public MergeableMultiLogReg aggregateDefault(ModelHolder models) {
+        return null;
+    }
 
 }

@@ -12,14 +12,16 @@ import java.util.ArrayList;
 public class ETreeNode extends GeneralNode {
     private ArrayList<Integer> parentNodeID;
     private ArrayList<Integer>[] childNodeIDList;
+    private boolean[] layersStatus;
 
     @Override
     public Object clone() {
-        ETreeNode result = null;
+        ETreeNode result;
         result=(ETreeNode) super.clone();
         int layers = Configuration.getInt("LAYERS");
         result.parentNodeID = new ArrayList<>(layers);
         result.childNodeIDList = new ArrayList[layers];
+        result.layersStatus = new boolean[layers];
         for (int i = 0; i < layers; i++)
             result.childNodeIDList[i] = new ArrayList<>();
         return result;
@@ -30,6 +32,7 @@ public class ETreeNode extends GeneralNode {
         int layers = Configuration.getInt("LAYERS");
         parentNodeID = new ArrayList<>(layers);
         childNodeIDList = new ArrayList[layers];
+        layersStatus = new boolean[layers];
         for (int i = 0; i < layers; i++)
             childNodeIDList[i] = new ArrayList<>();
 
@@ -51,6 +54,14 @@ public class ETreeNode extends GeneralNode {
     public void addChildNode(int layer, int nodeid) {
         if (layer >= childNodeIDList.length) return;
         childNodeIDList[layer].add(nodeid);
+    }
+
+    public void setLayersStatus(int layer, boolean flag) {
+        layersStatus[layer] = flag;
+    }
+
+    public boolean getLayersStatus(int layer) {
+        return layersStatus[layer];
     }
 
     public void setChildNodeIDList(int layer, ArrayList<Integer> nodelist) {

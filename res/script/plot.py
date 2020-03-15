@@ -4,30 +4,62 @@ from matplotlib.ticker import FuncFormatter
 def to_seconds(ms, position):
     return str(ms/1000) + 's'
 
+def to_percent(val, position):
+    return str(val*100.0) + '%'
+
+def plot_save(title, xlabel, cnt, flag):
+    plt.subplot(1,2,1)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.grid(True)
+    if flag:
+        plt.gca().xaxis.set_major_formatter(FuncFormatter(to_seconds))
+    plt.ylabel('Loss')
+    if flag:
+        plt.plot(x, loss_y, lossStyle[cnt] , label=losslabels[cnt])
+    else:
+        plt.plot(loss_y, lossStyle[cnt] , label=losslabels[cnt])
+    plt.legend()
+
+    plt.subplot(1,2,2)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.grid(True)
+    if flag:
+        plt.gca().xaxis.set_major_formatter(FuncFormatter(to_seconds))
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(to_percent))
+    plt.ylabel('Accuracy')
+    if flag:
+        plt.plot(x, acc_y, lossStyle[cnt] , label=losslabels[cnt])
+    else:
+        plt.plot(acc_y, lossStyle[cnt] , label=losslabels[cnt])
+    plt.legend()
+
 filenames = [
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/fed_100.txt',
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/etree_100.txt'
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200306/fed_100.txt',
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200306/etree_100_5_20.txt'
 ]
-labels = ['Federated Learning', 'ETree Learning', '5 layers']
-lineStyle = ['b-.', 'r-.', 'm-.']
+losslabels = ['Federated Learning', 'E-Tree Learning', 'E-Tree Learning 30']
+acclabels = ['Federated Learning accuracy', 'ETree Learning accuracy']
+lossStyle = ['b-.', 'r-.', 'm-.', 'g-.']
+accStyle = ['b-', 'r-', 'm-']
 cnt = 0
 
+plt.figure(figsize=(12, 4))
+
 for filepath in filenames:
-    x = [10]
-    y = [0.6931471805599446]
+    x = []
+    loss_y = []
+    acc_y = []
     with open(filepath) as file:
         for line in file:
-            a, b = line.split()
+            a, b, c = line.split()
             x.append(int(a))
-            y.append(float(b))
-        plt.plot(x, y, lineStyle[cnt], label=labels[cnt])
+            loss_y.append(float(b))
+            acc_y.append(float(c))
+        plot_save('100 nodes', 'Simulation time', cnt, True)
     cnt += 1
 
-plt.title("100 nodes")
-plt.xlabel("Simulation time")
-plt.ylabel("0-1 Error")
-plt.legend()
-plt.grid(True)
-plt.xscale('log')
-plt.gca().xaxis.set_major_formatter(FuncFormatter(to_seconds))
-plt.savefig('./test_fed_100.png', dpi=600)
+plt.savefig('reports/20200306/E7.png', dpi=300)
+
+# Simulation time

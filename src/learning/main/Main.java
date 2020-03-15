@@ -190,18 +190,20 @@ public class Main {
      * export loss to txt
      */
     private static Vector<Double> losses = new Vector<Double>();
+    private static Vector<Double> accs = new Vector<Double>();
     private static Vector<Long> realTimes = new Vector<Long>();
 
-    public static void addLoss(Long time, double loss) {
+    public static void addLoss(Long time, double loss, double acc) {
         realTimes.add(time);
         losses.add(loss);
+        accs.add(acc);
     }
 
     private static void exportToTXT() {
         try {
             FileWriter fileWriter = new FileWriter(Configuration.getString("OUTPUT_FILEPATH"));
             for (int i = 0; i < losses.size(); i++) {
-                fileWriter.write(realTimes.get(i) + " " + losses.get(i) +"\n");
+                fileWriter.write(realTimes.get(i) +" "+losses.get(i) +" "+ accs.get(i) +"\n");
             }
             fileWriter.flush();
             fileWriter.close();

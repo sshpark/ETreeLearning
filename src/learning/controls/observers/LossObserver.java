@@ -1,6 +1,8 @@
 package learning.controls.observers;
 
 import learning.interfaces.LearningProtocol;
+import learning.interfaces.Model;
+import learning.interfaces.ProbabilityModel;
 import learning.main.Main;
 import learning.models.LogisticRegression;
 import learning.utils.SparseVector;
@@ -21,27 +23,45 @@ public class LossObserver extends PredictionObserver {
     }
     private long cycle = 0;
 
+    private double crossEntropyLoss(double y, double[] y_pred) {
+        // clipping
+        double eps = 1e-8;
+        int label = (int)y;
+        y_pred[label] = Math.max(y_pred[label], eps);
+        y_pred[label] = Math.min(y_pred[label], 1.0-eps);
+        return -Math.log(y_pred[label]);
+    }
+
     @Override
     public boolean execute() {
         updateGraph();
-        Set<Integer> idxSet = generateIndices();
         double errs = 0.0;
-        for (int i : idxSet) {
+        double losses = 0.0;
+        for (int i = 0; i < Network.size(); i++) {
             Protocol p = ((Node) g.getNode(i)).getProtocol(pid);
+            double temp_errs = 0.0;
+            double temp_losses = 0.0;
             if (p instanceof LearningProtocol) {
-                LogisticRegression model = (LogisticRegression) ((LearningProtocol) p).getWorkerModel();
+                Model model = ((LearningProtocol) p).getWorkerModel();
                 for (int testIdx = 0; eval != null && testIdx < eval.size(); testIdx++) {
                     SparseVector testInstance = eval.getInstance(testIdx);
                     double y = eval.getLabel(testIdx);
                     double pred = model.predict(testInstance);
-                    errs += (y == pred) ? 0.0 : 1.0;
+                    temp_errs += (y == pred) ? 0.0 : 1.0;
+
+                    double[] y_pred = ((ProbabilityModel) model).distributionForInstance(testInstance);
+                    temp_losses += crossEntropyLoss(y, y_pred);
                 }
             }
+            errs += temp_errs/eval.size();
+            losses += temp_losses/eval.size();
         }
-        errs = errs / (eval.size() * Network.size());
+        errs /= Network.size();
+        losses /= Network.size();
         cycle++;
-        Main.addLoss(CommonState.getTime(), errs);
-        System.err.println("Time: "+ CommonState.getTime() + " Gossip 0-1 error: " + errs);
+        // TODO: Change it when you use it in the future
+        Main.addLoss(CommonState.getTime(), losses, 1.0-errs);
+        System.err.println("Time: "+ CommonState.getTime() + ", loss: " + losses + ", Accuracy: " + (1.0-errs));
         return false;
     }
 }

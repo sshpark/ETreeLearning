@@ -72,6 +72,8 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
   protected String prefix;
 
   protected int[][] minDelayMatrix;
+
+  protected double r;
   
   /**
    * This method performers the deep copying of the protocol.
@@ -79,15 +81,11 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
   @Override
   public abstract Object clone();
 
-  /**
-   * compute loss
-   */
-  public abstract void computeLoss(Model model);
-  
   protected void init(String prefix) {
     this.prefix = prefix;
     delayMean = Configuration.getDouble(prefix + "." + PAR_DELAYMEAN, Double.POSITIVE_INFINITY);
     delayVar = Configuration.getDouble(prefix + "." + PAR_DELAYVAR, 1.0);
+    r = Configuration.getDouble("REGULARIZATION");
     tFile = new File(Configuration.getString(prefix + "." + PAR_TFILE));
     eFile = new File(Configuration.getString(prefix + "." + PAR_EFILE));
     readerClassName = "learning.DataBaseReader";
@@ -252,6 +250,15 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
   public void initSession(Node node, int protocol) {
     sessionID ++;
     EDSimulator.add(0, new OnlineSessionFollowerActiveThreadMessage(sessionID), node, protocol);
+  }
+
+  protected double crossEntropyLoss(double y, double[] y_pred) {
+    // clipping
+    double eps = 1e-8;
+    int label = (int)y;
+    y_pred[label] = Math.max(y_pred[label], eps);
+    y_pred[label] = Math.min(y_pred[label], 1.0-eps);
+    return -Math.log(y_pred[label]);
   }
 
 }

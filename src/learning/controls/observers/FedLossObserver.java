@@ -37,7 +37,8 @@ public class FedLossObserver extends PredictionObserver {
 
         errs = errs / eval.size();
         cycle++;
-        Main.addLoss(cycle, errs);
+        // TODO: Change it when you use it in the future
+        //Main.addLoss(CommonState.getTime(), errs);
         System.err.println("Cycle: "+ cycle + " Fed 0-1 error: " + errs);
         return false;
     }

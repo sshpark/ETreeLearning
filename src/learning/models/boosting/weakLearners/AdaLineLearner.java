@@ -64,7 +64,12 @@ public class AdaLineLearner extends WeakLearner {
     }
   }
 
-  @Override
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    @Override
   public Object clone() {
     return new AdaLineLearner(this);
   }

@@ -178,8 +178,13 @@ public class NormaSVM implements Model {
   public void setNumberOfClasses(int numberOfClasses) {
     this.numberOfClasses = numberOfClasses;
   }
-  
-  private class ElementaryModel implements Serializable, Comparable<ElementaryModel> {
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    private class ElementaryModel implements Serializable, Comparable<ElementaryModel> {
     private static final long serialVersionUID = 6124398178368647304L;
     private final SparseVector x;
     private double alpha;

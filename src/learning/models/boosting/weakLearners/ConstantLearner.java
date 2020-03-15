@@ -74,8 +74,13 @@ public class ConstantLearner extends WeakLearner {
     this.numberOfClasses = numberOfClasses;
     distribution = new double[numberOfClasses];
   }
-  
-  public String toString() {
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append("Constant[Alpha=" + alpha);
     sb.append("\tAge=" + age);

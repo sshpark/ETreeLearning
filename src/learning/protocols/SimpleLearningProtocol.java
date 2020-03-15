@@ -98,8 +98,7 @@ public class SimpleLearningProtocol extends AbstractProtocol {
     return new SimpleLearningProtocol(prefix, delayMean, delayVar, modelHolderName, modelName);
   }
 
-  @Override
-  public void computeLoss(Model model) {
+  private void computeLoss(Model model) {
 
   }
 

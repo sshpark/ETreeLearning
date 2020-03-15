@@ -5,6 +5,7 @@ import learning.interfaces.VectorEntry;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Vector;
 
 /**
  * This class implements a sparse vector by arrays and sparse for the 0.0 value. <br/>
@@ -634,7 +635,11 @@ public class SparseVector implements Serializable, Iterable<VectorEntry>, Compar
     }
     return 0;
   }
-  
+
+  public double[] toDoubleArray() {
+    return values.clone();
+  }
+
   /**
    * Iterator class for SparseVector.
    * @author István Hegedűs
@@ -668,6 +673,7 @@ public class SparseVector implements Serializable, Iterable<VectorEntry>, Compar
       }
       vector.delete(vector.indices[index]);
     }
+
     
   }
 

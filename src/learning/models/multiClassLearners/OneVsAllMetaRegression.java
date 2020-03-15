@@ -1,5 +1,6 @@
 package learning.models.multiClassLearners;
 
+import learning.interfaces.ModelHolder;
 import learning.utils.SparseVector;
 
 public class OneVsAllMetaRegression extends OneVsAllMetaClassifier {
@@ -34,4 +35,14 @@ public class OneVsAllMetaRegression extends OneVsAllMetaClassifier {
     pred /= sum;
     return pred;
   }
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    @Override
+    public OneVsAllMetaClassifier aggregateDefault(ModelHolder models) {
+        return null;
+    }
 }

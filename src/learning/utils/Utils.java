@@ -1,11 +1,10 @@
 package learning.utils;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Random;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.Vector;
+import learning.interfaces.Model;
+import learning.interfaces.ModelHolder;
+import peersim.core.CommonState;
+
+import java.util.*;
 
 public class Utils {
   
@@ -319,5 +318,61 @@ public class Utils {
       return 0.0;
     }
     return mul / Math.sqrt(nA * nB);
+  }
+
+  /**
+   * Returns N unduplicated numbers in a randomly specified range
+   * @param max max value in specified range
+   * @param min min value in specified range
+   * @param n Random number
+   * @return int[] Result set of random number
+   */
+  public static ArrayList<Integer> randomArray(int min,int max,int n) {
+    int len = max-min+1;
+
+    if(max < min || n > len){
+      return null;
+    }
+
+    int[] source = new int[len];
+    for (int i = min; i < min+len; i++){
+      source[i-min] = i;
+    }
+
+    Integer result[] = new Integer[n];
+    Random rd = new Random();
+    int index;
+    for (int i = 0; i < n; i++) {
+      index = rd.nextInt(len-i);
+      result[i] = source[index];
+
+      int temp = source[index];
+      source[index] = source[len-1-i];
+      source[len-1-i] = temp;
+    }
+    return new ArrayList<>(Arrays.asList(result));
+  }
+
+  /**
+   * Returns N unduplicated numbers in a specified array
+   * @param num
+   * @param src
+   * @return
+   */
+  public static ArrayList<Integer> randomArray(int num, ArrayList<Integer> src) {
+    ArrayList<Integer> temp_src = new ArrayList<>(src);
+    Integer result[] = new Integer[num];
+
+    int index;
+    int len = temp_src.size();
+    for (int i = 0; i < num; i++) {
+      index = CommonState.r.nextInt(len-i);
+      result[i] = temp_src.get(index);
+
+      int temp = temp_src.get(index);
+      temp_src.set(index, temp_src.get(len-1-i));
+      temp_src.set(len-1-i, temp);
+    }
+    return new ArrayList<>(Arrays.asList(result));
   }
 }

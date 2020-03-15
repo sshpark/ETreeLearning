@@ -191,6 +191,11 @@ public class P2Winnow implements Model  {
 		this.numberOfClasses = numberOfClasses;		
 	}
 
-	
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+
 }
 

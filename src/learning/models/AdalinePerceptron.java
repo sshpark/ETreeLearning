@@ -92,5 +92,10 @@ public class AdalinePerceptron implements Model {
     this.numberOfClasses = numberOfClasses;
   }
 
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
 }
 

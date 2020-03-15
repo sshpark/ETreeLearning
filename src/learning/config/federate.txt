@@ -1,6 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/fed_100.txt
+OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/20200309/fed_100_noniid.txt
 TOPO_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/db/data100.in
 DELAY_OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/delay_fed.txt
 
@@ -18,11 +18,13 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
+RECV_PERCENT 1.0
+REGULARIZATION 0.01
 
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime 10 * 1000
+simulation.endtime 200 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -48,38 +50,39 @@ protocol.learningProtocol.compress 100
 protocol.learningProtocol.deltaF DELTAF
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
-protocol.learningProtocol.trainingFile res/db/spambase_train.dat
-protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
-protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
-
-protocol.learningProtocol.MergeableLogisticRegression.lambda 0.01
+protocol.learningProtocol.recvPercent RECV_PERCENT
+protocol.learningProtocol.trainingFile res/db/uciHAR_train_noniid4.dat
+protocol.learningProtocol.evaluationFile res/db/uciHAR_eval.dat
+protocol.learningProtocol.modelName learning.models.SoftmaxRegression
+protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.FedLogicalTopology
 init.overlayInit.protocol overlay
+init.overlayInit.recvPercent RECV_PERCENT
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
 init.overlayStart.protocolID overlay
 
 init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
-init.instanceLoader.trainingFile res/db/spambase_train.dat
-init.instanceLoader.evaluationFile res/db/spambase_eval.dat
-init.instanceLoader.samplesPerNode 41
+init.instanceLoader.trainingFile res/db/uciHAR_train_noniid4.dat
+init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
+init.instanceLoader.samplesPerNode 73
 
-init.setNumberOfClassesForModels learning.controls.initializers.SetNumberOfClassesForModels
-init.setNumberOfClassesForModels.protocol learningProtocol
+init.setParameterForModels learning.controls.initializers.SetParameterForModels
+init.setParameterForModels.protocol learningProtocol
 
 init.setMinDelayMatrixForProtocol learning.controls.initializers.SetMinDelayMatrixForProtocol
 init.setMinDelayMatrixForProtocol.protocol learningProtocol
 
-init.learningProtocolStart learning.controls.initializers.StartGossipMessageInitializer
+init.learningProtocolStart learning.controls.initializers.StartFedMessageInitializer
 init.learningProtocolStart.protocol learningProtocol
 init.learningProtocolStart.delay 0
 
 
 #-------------------- Define Init Sequence --------------------
-include.init overlayInit overlayStart instanceLoader setNumberOfClassesForModels setMinDelayMatrixForProtocol learningProtocolStart
+include.init overlayInit overlayStart instanceLoader setParameterForModels setMinDelayMatrixForProtocol learningProtocolStart
 
 
 #-------------------- Observers --------------------

@@ -52,7 +52,15 @@ public interface Model extends Serializable, Cloneable {
   /**
    * Sets the number of classes that will be used during the training phase.
    * 
-   * @param number of classes
+   * @param numberOfClasses number of classes
    */
   public void setNumberOfClasses(int numberOfClasses);
+
+  /**
+   * Sets the number of features
+   *
+   * @param numberOfFeatures number of features
+   */
+  public void setNumberOfFeatures(int numberOfFeatures);
+
 }

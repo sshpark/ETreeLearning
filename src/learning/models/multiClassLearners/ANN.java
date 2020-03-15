@@ -381,8 +381,13 @@ public class ANN extends ProbabilityModel {
   public void setNumberOfClasses(int numberOfClasses) {
     this.numberOfClasses = numberOfClasses;
   }
-  
-  @Override
+
+    @Override
+    public void setNumberOfFeatures(int numberOfFeatures) {
+
+    }
+
+    @Override
   public String toString() {
     StringBuffer out = new StringBuffer();
     for (int l = 0; l < thetas.length; l ++) {
