@@ -1,0 +1,1 @@
+在learning.models.SoftmaxRegression中的getNetOutput里将res[]的各元素减去最大值。
