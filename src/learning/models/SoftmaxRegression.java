@@ -1,7 +1,6 @@
 package learning.models;
 
 import java.math.BigDecimal;
-
 import learning.interfaces.Mergeable;
 import learning.interfaces.ModelHolder;
 import learning.interfaces.ProbabilityModel;
