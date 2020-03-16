@@ -1,0 +1,97 @@
+NETWORKSIZE 100
+ONLINESIZE NETWORKSIZE
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200313/etree_100_3_20_iid.txt
+DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_etree.txt
+
+# Network topology parameters
+TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
+LAYERS 3
+
+LOGTIME 2000
+SEED 1234567890
+
+# Transport parameters
+DROP 0.0
+
+# Overlay parameters
+NEWSCAST_CACHESIZE NETWORKSIZE/10.0
+NEWSCAST_FREQ NETWORKSIZE/10.0
+
+# Learner parameters
+CAPACITY NETWORKSIZE
+DELAY_MEAN 2000
+DELAY_VAR 0
+RECV_PERCENT 1.0
+REGULARIZATION 0.01
+
+#-------------------- General Simulation Properties --------------------
+network.size NETWORKSIZE
+network.node learning.node.ETreeNode
+simulation.endtime 100 * 1000
+simulation.logtime LOGTIME
+random.seed SEED
+
+
+#-------------------- Transport layer --------------------
+protocol.transport MinDelayTransport
+
+#-------------------- Connection layer --------------------
+protocol.overlay peersim.extras.mj.ednewscast.EdNewscast
+protocol.overlay.transport transport
+protocol.overlay.cache NEWSCAST_CACHESIZE
+protocol.overlay.baseFreq NEWSCAST_FREQ
+
+
+#-------------------- Learning layer(s) --------------------
+protocol.learningProtocol learning.protocols.ETreeLearningProtocol
+protocol.learningProtocol.linkable overlay
+protocol.learningProtocol.transport transport
+protocol.learningProtocol.delayMean DELAY_MEAN
+protocol.learningProtocol.delayVar DELAY_VAR
+protocol.learningProtocol.layers LAYERS
+protocol.learningProtocol.ratios 1,2,1
+protocol.learningProtocol.recvPercent RECV_PERCENT
+protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
+protocol.learningProtocol.capacity CAPACITY
+protocol.learningProtocol.trainingFile res/db/synthetic_train.dat
+protocol.learningProtocol.evaluationFile res/db/synthetic_eval.dat
+protocol.learningProtocol.modelName learning.models.SoftmaxRegression
+protocol.learningProtocol.SoftmaxRegression.lambda 0.02
+
+#-------------------- Initializers --------------------
+init.overlayInit learning.topology.ETreeLogicalTopology
+init.overlayInit.layers LAYERS
+init.overlayInit.recvPercent RECV_PERCENT
+init.overlayInit.groups 10,1,1
+init.overlayInit.protocol overlay
+
+init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
+init.overlayStart.protocolID overlay
+
+
+init.instanceLoader learning.controls.initializers.InstanceLoadFromSynthetic
+init.instanceLoader.protocol learningProtocol
+init.instanceLoader.trainingFile res/db/synthetic_train.dat
+init.instanceLoader.evaluationFile res/db/synthetic_eval.dat
+init.instanceLoader.numSamplesFile res/db/synthetic_samples.dat
+
+#init.instanceLoader learning.controls.initializers.InstanceLoader
+#init.instanceLoader.protocol learningProtocol
+#init.instanceLoader.trainingFile res/db/uciHAR_train.dat
+#init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
+#init.instanceLoader.samplesPerNode 73
+
+init.setParameterForModels learning.controls.initializers.SetParameterForModels
+init.setParameterForModels.protocol learningProtocol
+
+init.setMinDelayMatrixForProtocol learning.controls.initializers.SetMinDelayMatrixForProtocol
+init.setMinDelayMatrixForProtocol.protocol learningProtocol
+
+init.learningProtocolStart learning.controls.initializers.StartETreeMessageInitializer
+init.learningProtocolStart.protocol learningProtocol
+init.learningProtocolStart.recvPercent RECV_PERCENT
+init.learningProtocolStart.delay 0
+
+
+#-------------------- Define Init Sequence --------------------
+include.init overlayInit overlayStart instanceLoader setParameterForModels setMinDelayMatrixForProtocol learningProtocolStart
