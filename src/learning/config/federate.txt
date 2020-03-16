@@ -24,7 +24,7 @@ REGULARIZATION 0.01
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime 200 * 1000
+simulation.endtime 100 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -51,8 +51,8 @@ protocol.learningProtocol.deltaF DELTAF
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.recvPercent RECV_PERCENT
-protocol.learningProtocol.trainingFile res/db/uciHAR_train_noniid4.dat
-protocol.learningProtocol.evaluationFile res/db/uciHAR_eval.dat
+protocol.learningProtocol.trainingFile res/db/synthetic_train.dat
+protocol.learningProtocol.evaluationFile res/db/synthetic_eval.dat
 protocol.learningProtocol.modelName learning.models.SoftmaxRegression
 protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 
@@ -64,11 +64,12 @@ init.overlayInit.recvPercent RECV_PERCENT
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
 init.overlayStart.protocolID overlay
 
-init.instanceLoader learning.controls.initializers.InstanceLoader
+init.instanceLoader learning.controls.initializers.InstanceLoadFromSynthetic
 init.instanceLoader.protocol learningProtocol
-init.instanceLoader.trainingFile res/db/uciHAR_train_noniid4.dat
-init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
-init.instanceLoader.samplesPerNode 73
+init.instanceLoader.trainingFile res/db/synthetic_train.dat
+init.instanceLoader.evaluationFile res/db/synthetic_eval.dat
+init.instanceLoader.numSamplesFile res/db/synthetic_samples.dat
+
 
 init.setParameterForModels learning.controls.initializers.SetParameterForModels
 init.setParameterForModels.protocol learningProtocol

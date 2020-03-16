@@ -77,9 +77,9 @@ public class SoftmaxRegression extends ProbabilityModel implements Mergeable<Sof
         Matrix output = ins.mul(w).transpose().add(bias);
         double[] res = new double[numberOfClasses];
         for (int i = 0; i < numberOfClasses; i++) res[i] = output.getValue(i, 0);
-        double maxa = 0.0;
-        for (int i = 0; i < res.length; i++) maxa = Math.max(maxa, res[i]);
-        for (int i = 0; i < res.length; i++) res[i] -= maxa;
+//        double maxa = 0.0;
+//        for (int i = 0; i < res.length; i++) maxa = Math.max(maxa, res[i]);
+//        for (int i = 0; i < res.length; i++) res[i] -= maxa;
         return res;
     }
 

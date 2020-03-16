@@ -36,10 +36,10 @@ def plot_save(title, xlabel, cnt, flag):
     plt.legend()
 
 filenames = [
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200306/fed_100.txt',
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200306/etree_100_5_20.txt'
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200309/fed_100_noniid.txt',
+    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200313/etree_100_3_20_iid.txt'
 ]
-losslabels = ['Federated Learning', 'E-Tree Learning', 'E-Tree Learning 30']
+losslabels = ['FL', 'E-Tree', 'E-Tree Learning 30']
 acclabels = ['Federated Learning accuracy', 'ETree Learning accuracy']
 lossStyle = ['b-.', 'r-.', 'm-.', 'g-.']
 accStyle = ['b-', 'r-', 'm-']
@@ -60,6 +60,6 @@ for filepath in filenames:
         plot_save('100 nodes', 'Simulation time', cnt, True)
     cnt += 1
 
-plt.savefig('reports/20200306/E7.png', dpi=300)
+plt.savefig('./E1.png', dpi=300)
 
 # Simulation time

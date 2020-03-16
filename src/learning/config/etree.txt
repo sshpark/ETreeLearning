@@ -1,6 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200309/etree_100_5_20_iid.txt
+OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200313/etree_100_3_20_iid.txt
 DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
@@ -27,7 +27,7 @@ REGULARIZATION 0.01
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
 network.node learning.node.ETreeNode
-simulation.endtime 360 * 1000
+simulation.endtime 100 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -49,12 +49,12 @@ protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.layers LAYERS
-protocol.learningProtocol.ratios 1,5,1
+protocol.learningProtocol.ratios 1,2,1
 protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
-protocol.learningProtocol.trainingFile res/db/uciHAR_train.dat
-protocol.learningProtocol.evaluationFile res/db/uciHAR_eval.dat
+protocol.learningProtocol.trainingFile res/db/synthetic_train.dat
+protocol.learningProtocol.evaluationFile res/db/synthetic_eval.dat
 protocol.learningProtocol.modelName learning.models.SoftmaxRegression
 protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 
@@ -62,17 +62,24 @@ protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 init.overlayInit learning.topology.ETreeLogicalTopology
 init.overlayInit.layers LAYERS
 init.overlayInit.recvPercent RECV_PERCENT
-init.overlayInit.groups 20,1,1
+init.overlayInit.groups 10,1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
 init.overlayStart.protocolID overlay
 
-init.instanceLoader learning.controls.initializers.InstanceLoader
+
+init.instanceLoader learning.controls.initializers.InstanceLoadFromSynthetic
 init.instanceLoader.protocol learningProtocol
-init.instanceLoader.trainingFile res/db/uciHAR_train.dat
-init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
-init.instanceLoader.samplesPerNode 73
+init.instanceLoader.trainingFile res/db/synthetic_train.dat
+init.instanceLoader.evaluationFile res/db/synthetic_eval.dat
+init.instanceLoader.numSamplesFile res/db/synthetic_samples.dat
+
+#init.instanceLoader learning.controls.initializers.InstanceLoader
+#init.instanceLoader.protocol learningProtocol
+#init.instanceLoader.trainingFile res/db/uciHAR_train.dat
+#init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
+#init.instanceLoader.samplesPerNode 73
 
 init.setParameterForModels learning.controls.initializers.SetParameterForModels
 init.setParameterForModels.protocol learningProtocol
