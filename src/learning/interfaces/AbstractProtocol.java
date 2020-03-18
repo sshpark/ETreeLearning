@@ -54,6 +54,12 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
   /** @hidden */
   protected static final String PAR_DELAYVAR = "delayVar";
   protected double delayVar = 1.0;
+
+  // compute delay
+  protected static final String PAR_DELAYMAX = "computeDelayMax";
+  protected long computeDelayMax;
+  protected static final String PAR_DELAYMIN = "computeDelayMin";
+  protected long computeDelayMin;
   
   // instance variable
   /** @hidden */
@@ -85,6 +91,10 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
     this.prefix = prefix;
     delayMean = Configuration.getDouble(prefix + "." + PAR_DELAYMEAN, Double.POSITIVE_INFINITY);
     delayVar = Configuration.getDouble(prefix + "." + PAR_DELAYVAR, 1.0);
+    // compute delay
+    computeDelayMin = Configuration.getLong(prefix + "." + PAR_DELAYMIN, 1);
+    computeDelayMax = Configuration.getLong(prefix + "." + PAR_DELAYMAX, Long.MAX_VALUE);
+
     r = Configuration.getDouble("REGULARIZATION");
     tFile = new File(Configuration.getString(prefix + "." + PAR_TFILE));
     eFile = new File(Configuration.getString(prefix + "." + PAR_EFILE));

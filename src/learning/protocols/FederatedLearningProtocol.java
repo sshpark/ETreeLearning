@@ -13,6 +13,7 @@ import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDSimulator;
+import peersim.transport.UniformRandomTransport;
 
 import java.util.ArrayList;
 
@@ -38,6 +39,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     private ModelHolder receivedModels;
     private static int masterID;
     private ArrayList<Integer> selectedID;
+
 
     public FederatedLearningProtocol(String prefix) {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
@@ -81,7 +83,6 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         return new FederatedLearningProtocol(prefix, modelHolderName, modelName, compress, recvPercent);
     }
 
-
     @Override
     public void processEvent(Node currentNode, int currentProtocolID, Object messageObj) {
         this.currentNode = currentNode;
@@ -98,6 +99,10 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 
     private void workerUpdate() {
         update(workerModel);
+        // compute time
+        long range = computeDelayMax - computeDelayMin + 1;
+        long delay = (range == 1 ? computeDelayMin : computeDelayMin + CommonState.r.nextLong(range));
+        CommonState.setTime(CommonState.getTime() + delay);
 
         // send to master node
         ModelHolder latestModelHolder = new BoundedModelHolder(1);
