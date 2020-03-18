@@ -1,8 +1,8 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200309/fed_100_noniid.txt
-TOPO_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/db/data100.in
-DELAY_OUTPUT_FILEPATH /Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/delay_fed.txt
+OUTPUT_FILEPATH res/losses/20200309/fed_100_noniid.txt
+TOPO_FILEPATH res/db/data100.in
+DELAY_OUTPUT_FILEPATH res/losses/delay_fed.txt
 
 LOGTIME 2000
 SEED 1234567890
