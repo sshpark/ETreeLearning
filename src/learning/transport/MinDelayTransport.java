@@ -26,16 +26,17 @@ public class MinDelayTransport implements Transport {
         minDelayMatrix = TopoUtil.generateMinDelayMatrix(graph);
     }
 
+
     @Override
     public void send(Node src, Node dest, Object msg, int pid) {
-        int delay = minDelayMatrix[src.getIndex()][dest.getIndex()];
+        long delay = getLatency(src, dest);
 //        System.out.println("From " + src.getIndex() + " to " + dest.getIndex() + ", time: " + delay);
         EDSimulator.add(delay, msg, dest, pid);
     }
 
     @Override
     public long getLatency(Node src, Node dest) {
-        return 0;
+        return minDelayMatrix[src.getIndex()][dest.getIndex()];
     }
 
     @Override

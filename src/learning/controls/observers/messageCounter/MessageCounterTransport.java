@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import peersim.config.Configuration;
 import peersim.core.Node;
 import peersim.transport.Transport;
+import peersim.transport.UniformRandomTransport;
 
 /**
  * This class represents a transport layer that can count the 
