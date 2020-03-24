@@ -3,7 +3,6 @@ package learning.topology;
 import learning.controls.initializers.StartETreeMessageInitializer;
 import learning.node.ETreeNode;
 import learning.protocols.ETreeLearningProtocol;
-import learning.transport.Routing;
 import peersim.config.Configuration;
 import peersim.core.Network;
 import peersim.dynamics.WireGraph;
@@ -92,7 +91,6 @@ public class ETreeLogicalTopology extends WireGraph {
 
         ETreeLearningProtocol.setLayersNodeID(layersNodeID);
         StartETreeMessageInitializer.setLayersNodeID(layersNodeID);
-        Routing.setLayersNodeID(layersNodeID);
 
         /* ---------- debug output -------------
         for (ArrayList<Integer> temp : layersNodeID) {

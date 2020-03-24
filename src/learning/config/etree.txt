@@ -33,7 +33,8 @@ random.seed SEED
 
 
 #-------------------- Transport layer --------------------
-protocol.transport MinDelayTransport
+protocol.transport Routing
+protocol.transport.groups 10,1,1
 
 #-------------------- Connection layer --------------------
 protocol.overlay peersim.extras.mj.ednewscast.EdNewscast
