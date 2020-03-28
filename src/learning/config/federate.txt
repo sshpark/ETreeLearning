@@ -26,13 +26,13 @@ REGULARIZATION 0.001
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime 50 * 1000
+simulation.endtime 10 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
 
 #-------------------- Transport layer --------------------
-protocol.transport MinDelayTransport
+protocol.transport FedRouting
 
 
 #-------------------- Connection layer --------------------

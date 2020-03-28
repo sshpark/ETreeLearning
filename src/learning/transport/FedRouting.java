@@ -1,7 +1,5 @@
 package learning.transport;
 
-import learning.messages.MessageUp;
-import learning.node.ETreeNode;
 import learning.topology.TopoUtil;
 import peersim.config.Configuration;
 import peersim.core.Network;
@@ -9,81 +7,62 @@ import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 /**
- * Delay = transmission delay + propagation delay + processing delay + queuing delay
- *
  * @author sshpark
- * @date 21/3/2020
+ * @date 27/3/2020
  */
-public class ETreeRouting implements Transport {
+public class FedRouting implements Transport {
     private final int processing_delay = 5; // ms
     private final int propagation_delay = 1; // ms
     private final int transmission_delay = 10; // ms
-    private final int max_load_per_link = 1;
+    private final int max_load_per_link = 2;
+
+
 
     /*@hidden */
     private int[][] graph; // Physical topology
-    private int[][][] minDelayMatrix;
-    private int layers;
+    private int[][] minDelayMatrix;
+    private int masterId;
     private boolean hasInit;
 
-    private ArrayList<ArrayList<Integer>> layersNodeID;
-
-
-    public ETreeRouting(String prefix) {
+    public FedRouting(String prefix) {
         int n = Network.size();
         String topoFilePath = Configuration.getString("TOPO_FILEPATH");
-        layers = Configuration.getInt("LAYERS");
-
         graph = TopoUtil.getGraph(n, topoFilePath);
-        minDelayMatrix = new int[layers][n][n];
-        for (int k = 0; k < layers; k++) {
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    minDelayMatrix[k][i][j] = i == j ? 0 : 1;
-                }
-            }
-        }
-
         hasInit = false;
+        minDelayMatrix = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                minDelayMatrix[i][j] = i == j ? 0 : 1;
     }
 
     @Override
     public void send(Node src, Node dest, Object msg, int pid) {
         if (!hasInit) {
+            masterId = dest.getIndex();
             generatedDelayMatrix();
             hasInit = true;
         }
 
         int start = src.getIndex();
         int end = dest.getIndex();
-        int layer = ((MessageUp) msg).getLayer() + 1;
-        int delay = minDelayMatrix[layer][start][end] == 0 ? minDelayMatrix[layer][end][start] : minDelayMatrix[layer][start][end];
-         System.out.println("src: " + start + ", dest: " + end + ", delay: " + delay);
+        int delay = minDelayMatrix[start][end] == 0 ? minDelayMatrix[end][start] : minDelayMatrix[start][end];
         EDSimulator.add(delay, msg, dest, pid);
-    }
 
-    @Override
-    public long getLatency(Node src, Node dest) {
-        return 0;
-    }
-
-    @Override
-    public Object clone() {
-        return this;
     }
 
     /**
      * Calculate delay matrix
      * @param start
-     * @param layer
      * @param graph
      * @param load
      * @param flag
      */
-    private void shortestPath(int start, int layer, int[][] graph, int[][] load, boolean flag) {
+    private void shortestPath(int start, int[][] graph, int[][] load, boolean flag) {
         class Edge implements Comparable<Edge> {
             int to, cost;
 
@@ -134,17 +113,20 @@ public class ETreeRouting implements Transport {
 
         if (flag) {
             // child node
-            for (Integer destId : ((ETreeNode) Network.get(start)).getChildNodeList(layer)) {
-                int p = destId;
-                while (path[p] != -1) {
-                    load[p][path[p]] = 1;
-                    p = path[p];
+            for (int i = 0; i < Network.size(); i++) {
+                if (i != masterId) {
+                    int p = i;
+//                    System.out.print(p);
+                    while (path[p] != -1) {
+//                        System.out.print(" -> " + path[p]);
+                        load[p][path[p]] = 1;
+                        p = path[p];
+                    }
+//                    System.out.println();
                 }
             }
         } else {
-            for (Integer destId : ((ETreeNode) Network.get(start)).getChildNodeList(layer)) {
-                load[start][destId] = dis[destId];
-            }
+            load[start] = dis;
         }
     }
 
@@ -153,24 +135,18 @@ public class ETreeRouting implements Transport {
      */
     private void generatedDelayMatrix() {
         int n = Network.size();
-        generatedLayersNodeID();
 
-        for (int layer = 1; layer < layers; layer++) {
-            int[][] load = new int[n][n];
-            for (int i = 0; i < n; i++)
-                Arrays.fill(load[i], Integer.MAX_VALUE);
 
-            for (Integer rootId : layersNodeID.get(layer)) {
-                shortestPath(rootId, layer, graph, load, true);
-            }
-            calculateDelay(load);
+        int[][] load = new int[n][n];
+        for (int i = 0; i < n; i++)
+            Arrays.fill(load[i], Integer.MAX_VALUE);
 
-            int[][] res = new int[n][n];
-            for (Integer rootId : layersNodeID.get(layer)) {
-                shortestPath(rootId, layer, load, res, false);
-            }
-            minDelayMatrix[layer] = res;
-        }
+        shortestPath(masterId, graph, load, true);
+        calculateDelay(load);
+
+        int[][] res = new int[n][n];
+        shortestPath(masterId, load, res, false);
+        minDelayMatrix = res;
     }
 
     /**
@@ -190,6 +166,7 @@ public class ETreeRouting implements Transport {
                 }
             }
         }
+        System.out.println("master: " + out[39]);
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -204,24 +181,13 @@ public class ETreeRouting implements Transport {
         }
     }
 
-    /**
-     * Get node indexes in each layer.
-     */
-    private void generatedLayersNodeID() {
-        int n = Network.size();
-        layersNodeID = new ArrayList<>(layers);
+    @Override
+    public long getLatency(Node src, Node dest) {
+        return 0;
+    }
 
-        for (int i = 0; i < layers; i++) {
-            if (i == 0) {
-                layersNodeID.add(new ArrayList<Integer>() {{
-                    for (int j = 0; j < n; j++) add(j);
-                }});
-            } else {
-                Set<Integer> temp = new HashSet<>();
-                for (Integer id : layersNodeID.get(i - 1))
-                    temp.add(((ETreeNode) Network.get(id)).getParentNode(i));
-                layersNodeID.add(new ArrayList<>(temp));
-            }
-        }
+    @Override
+    public Object clone() {
+        return this;
     }
 }

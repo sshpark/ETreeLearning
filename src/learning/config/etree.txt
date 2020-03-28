@@ -33,7 +33,7 @@ random.seed SEED
 
 
 #-------------------- Transport layer --------------------
-protocol.transport Routing
+protocol.transport ETreeRouting
 protocol.transport.groups 10,1,1
 
 #-------------------- Connection layer --------------------
