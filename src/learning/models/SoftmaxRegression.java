@@ -28,8 +28,8 @@ public class SoftmaxRegression extends ProbabilityModel implements Mergeable<Sof
      */
     protected Matrix w;
     protected Matrix bias;
-    protected int numberOfFeatures = 60;
-    protected int numberOfClasses = 10;
+    protected int numberOfFeatures = 561;
+    protected int numberOfClasses = 6;
 
     /**
      * Initializes the hyperplane as 0 vector.
@@ -116,8 +116,6 @@ public class SoftmaxRegression extends ProbabilityModel implements Mergeable<Sof
     public void update(SparseVector instance, double label) {
         double[] prop = distributionForInstance(instance);
         Matrix ins = new Matrix(instance.toDoubleArray(), true);
-//        for (int i = 0; i < numberOfClasses; i++) System.out.print(i + " " + prop[i] + " ");
-//        System.out.println();
         prop[(int) label] -= 1;
         Matrix err = new Matrix(prop, false);
         Matrix dw = err.mul(ins).transpose();

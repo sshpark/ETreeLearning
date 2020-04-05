@@ -1,6 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH res/losses/20200313/etree_100_3_20_iid.txt
+OUTPUT_FILEPATH res/losses/temp/etree_100_high.txt
 DELAY_OUTPUT_FILEPATH res/losses/delay_etree.txt
 
 # Network topology parameters
@@ -21,13 +21,15 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
+DELAY_MIN 100
+DELAY_MAX 200
 RECV_PERCENT 1.0
 REGULARIZATION 0.01
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
 network.node learning.node.ETreeNode
-simulation.endtime 100 * 1000
+simulation.endtime 50 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -49,13 +51,15 @@ protocol.learningProtocol.linkable overlay
 protocol.learningProtocol.transport transport
 protocol.learningProtocol.delayMean DELAY_MEAN
 protocol.learningProtocol.delayVar DELAY_VAR
+protocol.learningProtocol.computeDelayMin DELAY_MIN
+protocol.learningProtocol.computeDelayMax DELAY_MAX
 protocol.learningProtocol.layers LAYERS
 protocol.learningProtocol.ratios 1,2,1
 protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
-protocol.learningProtocol.trainingFile res/db/synthetic_train.dat
-protocol.learningProtocol.evaluationFile res/db/synthetic_eval.dat
+protocol.learningProtocol.trainingFile res/db/uciHAR_train_noniid4.dat
+protocol.learningProtocol.evaluationFile res/db/uciHAR_eval.dat
 protocol.learningProtocol.modelName learning.models.SoftmaxRegression
 protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 
@@ -69,18 +73,17 @@ init.overlayInit.protocol overlay
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
 init.overlayStart.protocolID overlay
 
-
-init.instanceLoader learning.controls.initializers.InstanceLoadFromSynthetic
-init.instanceLoader.protocol learningProtocol
-init.instanceLoader.trainingFile res/db/synthetic_train.dat
-init.instanceLoader.evaluationFile res/db/synthetic_eval.dat
-init.instanceLoader.numSamplesFile res/db/synthetic_samples.dat
-
-#init.instanceLoader learning.controls.initializers.InstanceLoader
+#init.instanceLoader learning.controls.initializers.InstanceLoadFromSynthetic
 #init.instanceLoader.protocol learningProtocol
-#init.instanceLoader.trainingFile res/db/uciHAR_train.dat
-#init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
-#init.instanceLoader.samplesPerNode 73
+#init.instanceLoader.trainingFile res/db/synthetic_train.dat
+#init.instanceLoader.evaluationFile res/db/synthetic_eval.dat
+#init.instanceLoader.numSamplesFile res/db/synthetic_samples.dat
+
+init.instanceLoader learning.controls.initializers.InstanceLoader
+init.instanceLoader.protocol learningProtocol
+init.instanceLoader.trainingFile res/db/uciHAR_train_noniid4.dat
+init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
+init.instanceLoader.samplesPerNode 73
 
 init.setParameterForModels learning.controls.initializers.SetParameterForModels
 init.setParameterForModels.protocol learningProtocol
@@ -92,7 +95,6 @@ init.learningProtocolStart learning.controls.initializers.StartETreeMessageIniti
 init.learningProtocolStart.protocol learningProtocol
 init.learningProtocolStart.recvPercent RECV_PERCENT
 init.learningProtocolStart.delay 0
-
 
 #-------------------- Define Init Sequence --------------------
 include.init overlayInit overlayStart instanceLoader setParameterForModels setMinDelayMatrixForProtocol learningProtocolStart

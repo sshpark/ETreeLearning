@@ -9,8 +9,8 @@ import peersim.core.Node;
  */
 public class MessageUp extends ModelMessage {
     private int layer;
-    public MessageUp(Node src, int layer, ModelHolder models) {
-        super(src, models);
+    public MessageUp(Node src, int layer, ModelHolder models, long computeDelay) {
+        super(src, models, computeDelay);
         this.layer = layer;
     }
 

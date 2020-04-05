@@ -1,6 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH res/losses/20200318/fed_100_withComputeDelay.txt
+OUTPUT_FILEPATH res/losses/temp/fed_100_high.txt
 TOPO_FILEPATH res/db/data100.in
 DELAY_OUTPUT_FILEPATH res/losses/delay_fed.txt
 
@@ -18,15 +18,15 @@ NEWSCAST_FREQ NETWORKSIZE/10.0
 CAPACITY NETWORKSIZE
 DELAY_MEAN 2000
 DELAY_VAR 0
-DELAY_MIN 0
-DELAY_MAX 0
+DELAY_MIN 100
+DELAY_MAX 200
 RECV_PERCENT 1.0
 REGULARIZATION 0.001
 
 
 #-------------------- General Simulation Properties --------------------
 network.size NETWORKSIZE
-simulation.endtime 10 * 1000
+simulation.endtime 50 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
@@ -51,13 +51,14 @@ protocol.learningProtocol.delayVar DELAY_VAR
 protocol.learningProtocol.computeDelayMin DELAY_MIN
 protocol.learningProtocol.computeDelayMax DELAY_MAX
 protocol.learningProtocol.compress 100
+protocol.learningProtocol.epoch 1
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.recvPercent RECV_PERCENT
-protocol.learningProtocol.trainingFile res/db/spambase_train.dat
-protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
-protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
-protocol.learningProtocol.SoftmaxRegression.lambda 0.01
+protocol.learningProtocol.trainingFile res/db/uciHAR_train_noniid4.dat
+protocol.learningProtocol.evaluationFile res/db/uciHAR_eval.dat
+protocol.learningProtocol.modelName learning.models.SoftmaxRegression
+protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.FedLogicalTopology
@@ -69,10 +70,9 @@ init.overlayStart.protocolID overlay
 
 init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
-init.instanceLoader.trainingFile res/db/spambase_train.dat
-init.instanceLoader.evaluationFile res/db/spambase_eval.dat
-init.instanceLoader.numSamplesFile res/db/synthetic_samples.dat
-
+init.instanceLoader.trainingFile res/db/uciHAR_train_noniid4.dat
+init.instanceLoader.evaluationFile res/db/uciHAR_eval.dat
+init.instanceLoader.samplesPerNode 73
 
 init.setParameterForModels learning.controls.initializers.SetParameterForModels
 init.setParameterForModels.protocol learningProtocol

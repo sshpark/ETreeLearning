@@ -117,14 +117,23 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         if (messageObj instanceof ActiveThreadMessage) {
             int currentLayer = 0;
             ETreeNode node = (ETreeNode) currentNode;
-            // update model
             Model wkmodel = layersWorkerModel[currentLayer];
-            wkmodel = workerUpdate(wkmodel);
+            long range = computeDelayMax - computeDelayMin + 1;
+            long delay = 0;
+
+
+            for (int epoch = 0; epoch < aggregateRatio[0]; epoch++) {
+                // update model
+                wkmodel = workerUpdate(wkmodel);
+                // compute time
+                delay += (range == 1 ? computeDelayMin : computeDelayMin + CommonState.r.nextLong(range));
+            }
+
 
             // send to next layer
             ModelHolder latestModelHolder = new BoundedModelHolder(1);
             latestModelHolder.add((Model) wkmodel.clone());
-            sendTo(new MessageUp(node, currentLayer, latestModelHolder), node.getParentNode(currentLayer));
+            sendTo(new MessageUp(node, currentLayer, latestModelHolder, delay), node.getParentNode(currentLayer));
         } else if (messageObj instanceof MessageUp) { // receive message from child node
 //            System.out.println("Time: " + CommonState.getTime() + ", current node: " + currentNode.getIndex() + ", recv from: "
 //                    + ((MessageUp) messageObj).getSource().getIndex() +
@@ -361,7 +370,7 @@ public class ETreeLearningProtocol extends AbstractProtocol {
                 // send to next layer
                 ModelHolder latestModelHolder = new BoundedModelHolder(1);
                 latestModelHolder.add((Model) workerModel.clone());
-                sendTo(new MessageUp(node, layer, latestModelHolder), node.getParentNode(layer));
+                sendTo(new MessageUp(node, layer, latestModelHolder, 0), node.getParentNode(layer));
             }
         }
     }

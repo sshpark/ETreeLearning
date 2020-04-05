@@ -25,7 +25,8 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     private final static String PAR_MODELHOLDERNAME = "modelHolderName";
     private final static String PAR_MODELNAME = "modelName";
     private final static String PAR_COMPRESS = "compress";
-    private static final String PAR_RECVPERCENT = "recvPercent";
+    private final static String PAR_RECVPERCENT = "recvPercent";
+    private final static String PAR_EPOCH = "epoch";
 
     /**
      * @hidden
@@ -33,6 +34,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     private final String modelHolderName;
     private final String modelName;
     private final int compress;
+    private final int epoches;
     private final double recvPercent;
 
     private Model workerModel;
@@ -45,6 +47,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
         modelHolderName = Configuration.getString(prefix + "." + PAR_MODELHOLDERNAME);
         modelName = Configuration.getString(prefix + "." + PAR_MODELNAME);
         compress = Configuration.getInt(prefix + "." + PAR_COMPRESS);
+        epoches = Configuration.getInt(prefix + "." + PAR_EPOCH);
         recvPercent = Configuration.getDouble(prefix + "." + PAR_RECVPERCENT);
         init(prefix);
     }
@@ -56,10 +59,11 @@ public class FederatedLearningProtocol extends AbstractProtocol {
      * @param modelHolderName
      * @param modelName
      */
-    private FederatedLearningProtocol(String prefix, String modelHolderName, String modelName, int compress, double recvPercent) {
+    private FederatedLearningProtocol(String prefix, String modelHolderName, String modelName, int compress, int epoches, double recvPercent) {
         this.modelHolderName = modelHolderName;
         this.modelName = modelName;
         this.compress = compress;
+        this.epoches = epoches;
         this.recvPercent = recvPercent;
         init(prefix);
     }
@@ -80,7 +84,7 @@ public class FederatedLearningProtocol extends AbstractProtocol {
 
     @Override
     public Object clone() {
-        return new FederatedLearningProtocol(prefix, modelHolderName, modelName, compress, recvPercent);
+        return new FederatedLearningProtocol(prefix, modelHolderName, modelName, compress, epoches, recvPercent);
     }
 
     @Override
@@ -98,16 +102,22 @@ public class FederatedLearningProtocol extends AbstractProtocol {
     }
 
     private void workerUpdate() {
-        update(workerModel);
+
         // compute time
         long range = computeDelayMax - computeDelayMin + 1;
-        long delay = (range == 1 ? computeDelayMin : computeDelayMin + CommonState.r.nextLong(range));
-        CommonState.setTime(CommonState.getTime() + delay);
+        long delay = 0;
+
+
+        for (int epoch = 0; epoch < epoches; epoch++) {
+            update(workerModel);
+            delay += (range == 1 ? computeDelayMin : computeDelayMin + CommonState.r.nextLong(range));
+        }
+
 
         // send to master node
         ModelHolder latestModelHolder = new BoundedModelHolder(1);
         latestModelHolder.add((Model) workerModel.clone());
-        sendTo(new ModelMessage(currentNode, latestModelHolder), Network.get(masterID));
+        sendTo(new ModelMessage(currentNode, latestModelHolder, delay), Network.get(masterID));
     }
 
     private void masterAggregate(ModelMessage message) {

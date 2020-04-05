@@ -89,7 +89,7 @@ public class GossipLearningProtocol extends AbstractProtocol {
         ModelHolder latestModelHolder = new BoundedModelHolder(1);
         Model model = (Model) workerModel.clone();
         latestModelHolder.add(model);
-        sendToRandomNeighbor(new ModelMessage(currentNode, latestModelHolder));
+        sendToRandomNeighbor(new ModelMessage(currentNode, latestModelHolder, 0));
     }
 
     @Override

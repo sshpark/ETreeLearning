@@ -1,5 +1,6 @@
 package learning.transport;
 
+import learning.messages.ModelMessage;
 import learning.topology.TopoUtil;
 import peersim.config.Configuration;
 import peersim.core.Network;
@@ -7,6 +8,8 @@ import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -18,7 +21,7 @@ import java.util.Queue;
 public class FedRouting implements Transport {
     private final int processing_delay = 5; // ms
     private final int propagation_delay = 1; // ms
-    private final int transmission_delay = 10; // ms
+    private final int transmission_delay = 100; // ms
     private final int max_load_per_link = 2;
 
 
@@ -45,13 +48,14 @@ public class FedRouting implements Transport {
         if (!hasInit) {
             masterId = dest.getIndex();
             generatedDelayMatrix();
+            test_output("res/delay/fed.txt");
             hasInit = true;
         }
 
         int start = src.getIndex();
         int end = dest.getIndex();
         int delay = minDelayMatrix[start][end] == 0 ? minDelayMatrix[end][start] : minDelayMatrix[start][end];
-        EDSimulator.add(delay, msg, dest, pid);
+        EDSimulator.add(delay+((ModelMessage) msg).getComputeDelay(), msg, dest, pid);
 
     }
 
@@ -189,5 +193,21 @@ public class FedRouting implements Transport {
     @Override
     public Object clone() {
         return this;
+    }
+
+    private void test_output(String filepath) {
+        try {
+            FileWriter fileWriter = new FileWriter(filepath);
+
+            for (int j = 0; j < Network.size(); j++)
+                for (int k = 0; k < Network.size(); k++)
+                    if (minDelayMatrix[j][k] != 0)
+                        fileWriter.write(minDelayMatrix[j][k] + " ");
+
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

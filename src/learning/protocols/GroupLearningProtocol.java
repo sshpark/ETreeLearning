@@ -84,7 +84,7 @@ public class GroupLearningProtocol extends AbstractProtocol {
             }
             ModelHolder latestModelHolder = new BoundedModelHolder(1);
             latestModelHolder.add((Model) workerModel.clone());
-            sendTo(new ModelMessage(currentNode, latestModelHolder), currentNode.getIndex()/10*10);
+            sendTo(new ModelMessage(currentNode, latestModelHolder, 0), currentNode.getIndex()/10*10);
             iter++;
             // next update
             EDSimulator.add(10, ActiveThreadMessage.getInstance(), currentNode, currentProtocolID);

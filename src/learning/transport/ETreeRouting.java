@@ -9,6 +9,8 @@ import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -20,8 +22,8 @@ import java.util.*;
 public class ETreeRouting implements Transport {
     private final int processing_delay = 5; // ms
     private final int propagation_delay = 1; // ms
-    private final int transmission_delay = 10; // ms
-    private final int max_load_per_link = 1;
+    private final int transmission_delay = 100; // ms
+    private final int max_load_per_link = 2;
 
     /*@hidden */
     private int[][] graph; // Physical topology
@@ -54,6 +56,7 @@ public class ETreeRouting implements Transport {
     public void send(Node src, Node dest, Object msg, int pid) {
         if (!hasInit) {
             generatedDelayMatrix();
+            test_output("res/delay/ETree.txt");
             hasInit = true;
         }
 
@@ -61,8 +64,8 @@ public class ETreeRouting implements Transport {
         int end = dest.getIndex();
         int layer = ((MessageUp) msg).getLayer() + 1;
         int delay = minDelayMatrix[layer][start][end] == 0 ? minDelayMatrix[layer][end][start] : minDelayMatrix[layer][start][end];
-         System.out.println("src: " + start + ", dest: " + end + ", delay: " + delay);
-        EDSimulator.add(delay, msg, dest, pid);
+//        System.out.println("src: " + start + ", dest: " + end + ", delay: " + delay);
+        EDSimulator.add(delay+((MessageUp) msg).getComputeDelay(), msg, dest, pid);
     }
 
     @Override
@@ -222,6 +225,22 @@ public class ETreeRouting implements Transport {
                     temp.add(((ETreeNode) Network.get(id)).getParentNode(i));
                 layersNodeID.add(new ArrayList<>(temp));
             }
+        }
+    }
+
+    private void test_output(String filepath) {
+        try {
+            FileWriter fileWriter = new FileWriter(filepath);
+            for (int i = 1; i < layers; i++) {
+                for (int j = 0; j < Network.size(); j++)
+                    for (int k = 0; k < Network.size(); k++)
+                        if (minDelayMatrix[i][j][k] != 0)
+                            fileWriter.write(minDelayMatrix[i][j][k] + " ");
+            }
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

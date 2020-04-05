@@ -22,6 +22,8 @@ public class ModelMessage implements ModelHolder, Message {
   private Node src;
   /** @hidden */
   private final ModelHolder models;
+  /** @hidden */
+  private long computeDelay;
 
   /**
    * Constructor which creates a deep copy of the models.
@@ -29,9 +31,10 @@ public class ModelMessage implements ModelHolder, Message {
    * @param src It points to the sender node of this message.
    * @param models The data part of the message.
    */
-  public ModelMessage(Node src, ModelHolder models) {
+  public ModelMessage(Node src, ModelHolder models, long computeDelay) {
     this.src = src;
     this.models = (ModelHolder)models.clone();
+    this.computeDelay = computeDelay;
   }
 
   /**
@@ -62,7 +65,7 @@ public class ModelMessage implements ModelHolder, Message {
    */
   @Override
   public Object clone() {
-    return new ModelMessage(src, models);
+    return new ModelMessage(src, models, computeDelay);
   }
 
   /**
@@ -134,5 +137,13 @@ public class ModelMessage implements ModelHolder, Message {
   @Override
   public void clear() {
     models.clear();
+  }
+
+  public long getComputeDelay() {
+    return computeDelay;
+  }
+
+  public void setComputeDelay(long computeDelay) {
+    this.computeDelay = computeDelay;
   }
 }
