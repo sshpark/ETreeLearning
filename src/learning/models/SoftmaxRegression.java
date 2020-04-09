@@ -29,7 +29,7 @@ public class SoftmaxRegression extends ProbabilityModel implements Mergeable<Sof
      */
     protected Matrix w;
     protected Matrix bias;
-    protected int numberOfFeatures = 784;
+    protected int numberOfFeatures = 16;
     protected int numberOfClasses = 10;
 //    protected int numberOfFeatures = 561;
 //    protected int numberOfClasses = 6;
