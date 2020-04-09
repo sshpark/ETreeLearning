@@ -1,6 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/20200315/etree_100_5_20_iid_mnist.txt
+OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/20200408/etree_100_5_20_iid_pendigits_km.txt
 DELAY_OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
@@ -55,6 +55,8 @@ protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHold
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.trainingFile res/db/pendigits/pendigits_tra.dat
 protocol.learningProtocol.evaluationFile res/db/pendigits/pendigits_eval.dat
+protocol.learningProtocol.evalForClusteringFile res/db/pendigits/pendigits_tes_200.dat
+protocol.learningProtocol.pretrainRounds 10
 #protocol.learningProtocol.trainingFile res/db/uciHAR_train.dat
 #protocol.learningProtocol.evaluationFile res/db/uciHAR_eval.dat
 protocol.learningProtocol.modelName learning.models.SoftmaxRegression
