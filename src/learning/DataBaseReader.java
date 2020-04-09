@@ -27,6 +27,8 @@ public class DataBaseReader {
   private InstanceHolder trainingSet;
   /** @hidden */
   private InstanceHolder evalSet;
+  /** @hidden */
+  private InstanceHolder evalForClusteringSet;
   
   private int numberOfClasses;
   private int numberOfFeatures;
@@ -67,6 +69,43 @@ public class DataBaseReader {
     numberOfClasses = Math.max(trainingSet.getNumberOfClasses(), evalSet.getNumberOfClasses());
     trainingSet = new InstanceHolder(trainingSet.getInstances(), trainingSet.getLabels(), numberOfClasses, numberOfFeatures);
     evalSet = new InstanceHolder(evalSet.getInstances(), evalSet.getLabels(), numberOfClasses, numberOfFeatures);
+  
+  }
+  
+  protected DataBaseReader(final File tFile, final File eFile, final File ecFile) throws IOException{
+    means = new SparseVector();
+    devs = new SparseVector();
+    isStandardized = false;
+    
+    // reading training file
+    trainingSet = parseFile(tFile);
+    
+    // compute means and standard deviations on training set for standardization
+    for (int i = 0; i < trainingSet.size(); i++) {
+      means.add(trainingSet.getInstance(i));
+      for (VectorEntry e : trainingSet.getInstance(i)) {
+        devs.put(e.index, devs.get(e.index) + (e.value * e.value));
+      }
+    }
+    means.mul(1.0 / (double)trainingSet.size());
+    devs.mul(1.0 / (double)trainingSet.size());
+    for (VectorEntry e : means) {
+      devs.put(e.index, devs.get(e.index) - (e.value * e.value));
+    }
+    devs.sqrt();
+    
+    // reading evaluation file
+    evalSet = parseFile(eFile);
+    
+    // reading evaluation set for clustering file
+    evalForClusteringSet = parseFile(ecFile);
+    
+    // set the correct number of features and classes for both sets
+    numberOfFeatures = Math.max(trainingSet.getNumberOfFeatures(), evalSet.getNumberOfFeatures());
+    numberOfClasses = Math.max(trainingSet.getNumberOfClasses(), evalSet.getNumberOfClasses());
+    trainingSet = new InstanceHolder(trainingSet.getInstances(), trainingSet.getLabels(), numberOfClasses, numberOfFeatures);
+    evalSet = new InstanceHolder(evalSet.getInstances(), evalSet.getLabels(), numberOfClasses, numberOfFeatures);
+    evalForClusteringSet = new InstanceHolder(evalForClusteringSet.getInstances(), evalForClusteringSet.getLabels(), numberOfClasses, numberOfFeatures);
   
   }
   
@@ -167,6 +206,14 @@ public class DataBaseReader {
   }
   
   /**
+   * Returns a collection of the instances and the corresponding labels of the parsed evaluation for clustering set.
+   * @return evaluation for clustering set.
+   */
+  public InstanceHolder getEvalForClusteringSet() {
+    return evalForClusteringSet;
+  }
+  
+  /**
    * Standardizes the training and test data sets based on the training data.
    */
   public void standardize() {
@@ -251,6 +298,7 @@ public class DataBaseReader {
   private static DataBaseReader instance = null;
   private static File tFile = null;
   private static File eFile = null;
+  private static File ecFile = null;
   
   /**
    * Creates and returns a DataBaseReader object that contains the training and the evaluation sets. 
@@ -270,6 +318,19 @@ public class DataBaseReader {
       Class<? extends DataBaseReader> dataBaseReaderClass = (Class<? extends DataBaseReader>) Class.forName(className);
       Constructor<? extends DataBaseReader> dbrConst = dataBaseReaderClass.getDeclaredConstructor(File.class, File.class);
       DataBaseReader.instance = dbrConst.newInstance(tFile, eFile);
+    }
+    return instance;
+  }
+  
+  @SuppressWarnings("unchecked")
+  public static DataBaseReader createDataBaseReader(String className, final File tFile, final File eFile, final File ecFile) throws Exception {
+    if (instance == null || !instance.getClass().getCanonicalName().equals(className) || !tFile.equals(DataBaseReader.tFile) || !eFile.equals(DataBaseReader.eFile) || !ecFile.equals(DataBaseReader.ecFile)) {
+      DataBaseReader.tFile = tFile;
+      DataBaseReader.eFile = eFile;
+      DataBaseReader.ecFile = ecFile;
+      Class<? extends DataBaseReader> dataBaseReaderClass = (Class<? extends DataBaseReader>) Class.forName(className);
+      Constructor<? extends DataBaseReader> dbrConst = dataBaseReaderClass.getDeclaredConstructor(File.class, File.class, File.class);
+      DataBaseReader.instance = dbrConst.newInstance(tFile, eFile, ecFile);
     }
     return instance;
   }
