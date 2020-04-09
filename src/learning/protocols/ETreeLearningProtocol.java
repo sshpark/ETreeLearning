@@ -15,6 +15,7 @@ import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -107,6 +108,37 @@ public class ETreeLearningProtocol extends AbstractProtocol {
         } catch (Exception e) {
             throw new RuntimeException("Exception occured in initialization of " + getClass().getCanonicalName() + ": " + e);
         }
+    }
+    
+    // return the classes the node owns
+    public HashSet<Double> classDistribution() {
+    	HashSet<Double> classes = new HashSet<Double>();
+    	for (int i = 0; instances != null && i < instances.size(); i++) {
+    		if (!classes.contains(instances.getLabel(i))) {
+    			classes.add(instances.getLabel(i));
+    		}
+    	}
+    	return classes;
+    }
+    
+    // train independently before the etree learning starts, return the average accuracy and clear the model
+    public double pretrain() {
+    	Model model = (Model) layersWorkerModel[0].clone();
+    	// train n rounds on the model
+    	for (int i = 0; i < pretrainRounds; i++) {
+    		model = workerUpdate(model);
+    	}
+    	
+    	double errs = 0.0;
+        for (int testIdx = 0; evalForClusteringSet != null && testIdx < evalForClusteringSet.size(); testIdx++) {
+            SparseVector testInstance = evalForClusteringSet.getInstance(testIdx);
+            double y = evalForClusteringSet.getLabel(testIdx);
+            double pred = model.predict(testInstance);
+            errs += (y == pred) ? 0.0 : 1.0;
+        }
+        errs = errs / evalForClusteringSet.size();
+        double accuracy = 1.0 - errs;
+    	return accuracy;
     }
 
     @Override
