@@ -1,11 +1,14 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/20200408/etree_100_5_20_iid_pendigits_km.txt
+OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/20200408/etree_100_5_8_noniid_pendigits_kma005.txt
 DELAY_OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
 TOPO_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/db/data100.in
 LAYERS 3
+
+# clustering algorithm, 0-km, 1-kma, 2-ununiformkma
+clustering.mode 1
 
 LOGTIME 2000
 SEED 1234567890
@@ -31,6 +34,12 @@ simulation.endtime 360 * 1000
 simulation.logtime LOGTIME
 random.seed SEED
 
+#----------------settings of clustering based on accuracies-------------
+clustering.delta 0.05
+# 2 means check the half of nodes
+clustering.checkNearestRatio 2
+clustering.iterations 100
+
 
 #-------------------- Transport layer --------------------
 protocol.transport MinDelayTransport
@@ -53,12 +62,10 @@ protocol.learningProtocol.ratios 1,5,1
 protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
-protocol.learningProtocol.trainingFile res/db/pendigits/pendigits_tra.dat
+protocol.learningProtocol.trainingFile res/db/pendigits/pendigits_tra_noniid.dat
 protocol.learningProtocol.evaluationFile res/db/pendigits/pendigits_eval.dat
-protocol.learningProtocol.evalForClusteringFile res/db/pendigits/pendigits_tes_200.dat
+protocol.learningProtocol.evalForClusteringFile res/db/pendigits/pendigits_tes_1000.dat
 protocol.learningProtocol.pretrainRounds 10
-#protocol.learningProtocol.trainingFile res/db/uciHAR_train.dat
-#protocol.learningProtocol.evaluationFile res/db/uciHAR_eval.dat
 protocol.learningProtocol.modelName learning.models.SoftmaxRegression
 protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 
@@ -66,7 +73,7 @@ protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 init.overlayInit learning.topology.ETreeLogicalTopology
 init.overlayInit.layers LAYERS
 init.overlayInit.recvPercent RECV_PERCENT
-init.overlayInit.groups 20,1,1
+init.overlayInit.groups 8,1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
@@ -74,9 +81,8 @@ init.overlayStart.protocolID overlay
 
 init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
-init.instanceLoader.trainingFile res/db/pendigits/pendigits_tra.dat
+init.instanceLoader.trainingFile res/db/pendigits/pendigits_tra_noniid.dat
 init.instanceLoader.evaluationFile res/db/pendigits/pendigits_eval.dat
-init.instanceLoader.evalForClusteringFile res/db/pendigits/pendigits_tes_200.dat
 init.instanceLoader.samplesPerNode 74
 #init.instanceLoader.trainingFile res/db/mnist/mnist_tra.dat
 #init.instanceLoader.evaluationFile res/db/mnist/mnist_eval.dat
