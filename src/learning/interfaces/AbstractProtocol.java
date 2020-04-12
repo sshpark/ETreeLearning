@@ -39,11 +39,16 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
   // compute eval accuracy
   private static final String PAR_TFILE = "trainingFile";
   private static final String PAR_EFILE = "evaluationFile";
+  private static final String PAR_ECFILE = "evalForClusteringFile";
+  private static final String PAR_PRETRAINROUNDS = "pretrainRounds";
   protected File tFile;
   protected File eFile;
+  protected File ecFile;
   protected String readerClassName;
   protected DataBaseReader reader;
   protected InstanceHolder eval;
+  protected InstanceHolder evalForClusteringSet;
+  protected int pretrainRounds;
   protected long cycle;
 
 
@@ -88,10 +93,14 @@ public abstract class AbstractProtocol implements EDProtocol, Churnable, Learnin
     r = Configuration.getDouble("REGULARIZATION");
     tFile = new File(Configuration.getString(prefix + "." + PAR_TFILE));
     eFile = new File(Configuration.getString(prefix + "." + PAR_EFILE));
+    ecFile = new File(Configuration.getString(prefix + "." + PAR_ECFILE));
+    pretrainRounds = Configuration.getInt(prefix + "." + PAR_PRETRAINROUNDS);
     readerClassName = "learning.DataBaseReader";
     try {
-      reader = DataBaseReader.createDataBaseReader(readerClassName, tFile, eFile);
+//      reader = DataBaseReader.createDataBaseReader(readerClassName, tFile, eFile);
+      reader = DataBaseReader.createDataBaseReader(readerClassName, tFile, eFile, ecFile);
       eval = reader.getEvalSet();
+      evalForClusteringSet = reader.getEvalForClusteringSet();
       cycle = 0;
     } catch (Exception ex) {
       throw new RuntimeException("Exception has occurred in InstanceLoader!", ex);
