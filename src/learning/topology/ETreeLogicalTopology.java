@@ -58,6 +58,13 @@ public class ETreeLogicalTopology extends WireGraph {
     public void wire(Graph g) {
         // node size
         final int n = Network.size();
+        
+        int clusteringMode = Configuration.getInt("clustering.mode", 0);
+        
+        // if using the clustering algorithm based on accuracies, do this step.
+//        if (clusteringMode == 1) {
+        	TopoUtil.pretrainForClustering();
+//        }
 
         ArrayList<Integer> lastNodeIndexes = new ArrayList<Integer>() {{
                 for (int i = 0; i < n; i++) add(i);
@@ -71,8 +78,44 @@ public class ETreeLogicalTopology extends WireGraph {
         ArrayList<ArrayList<Integer>> res;
         for (int layer = 0; layer < layers; layer++) {
             layersNodeID.add(new ArrayList<>(lastNodeIndexes));
-            // gets the grouping result for the current layer
-            res = TopoUtil.getGraphPartitionResult(graph, lastNodeIndexes, groups[layer]);
+            
+            /*
+             *  gets the grouping result for the current layer
+             */
+            switch (clusteringMode) {
+			case 0:
+				// kmeans
+	            res = TopoUtil.getGraphPartitionResult(graph, lastNodeIndexes, groups[layer]);
+				break;
+			case 1:
+				// kmeans based on average accuracy
+	            if (groups[layer] > 1) {
+	            	res = TopoUtil.getGraphPartitionByDistanceAndDataDistribution(graph, lastNodeIndexes, groups[layer]);
+	            } else {
+	            	res = new ArrayList<ArrayList<Integer>>();
+	            	int[][] minDelayMatrix = TopoUtil.generateMinDelayMatrix(graph);
+	            	int centerId = TopoUtil.findCenterId(lastNodeIndexes, minDelayMatrix);
+	            	lastNodeIndexes.add(centerId);
+	            	res.add((ArrayList<Integer>) lastNodeIndexes.clone());
+	            }
+				break;
+			case 2:
+				// kmeans based on ununiform data distribution
+	            if (groups[layer] > 1) {
+	            	res = TopoUtil.getUnuniformGraphPartition(graph, lastNodeIndexes, groups[layer]);
+	            } else {
+	            	res = new ArrayList<ArrayList<Integer>>();
+	            	int[][] minDelayMatrix = TopoUtil.generateMinDelayMatrix(graph);
+	            	int centerId = TopoUtil.findCenterId(lastNodeIndexes, minDelayMatrix);
+	            	lastNodeIndexes.add(centerId);
+	            	res.add((ArrayList<Integer>) lastNodeIndexes.clone());
+	            }
+				break;
+			default:
+				// kmeans
+	            res = TopoUtil.getGraphPartitionResult(graph, lastNodeIndexes, groups[layer]);
+				break;
+			}
 
             lastNodeIndexes.clear();
             for (ArrayList<Integer> group : res) {
