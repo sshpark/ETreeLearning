@@ -7,46 +7,67 @@ def to_seconds(ms, position):
 def to_percent(val, position):
     return str(val*100.0) + '%'
 
+def find_closed_index(x, val):
+    for i in range(len(x)):
+        if x[i] == val:
+            return i
+        if x[i] > val:
+            return i-1
+    return len(x)-1
+
 def plot_save(title, xlabel, cnt, flag):
     plt.subplot(1,2,1)
-    plt.title(title)
-    plt.xlabel(xlabel)
+    if flag:
+        plt.plot(x, loss_y, lossStyle[cnt], label=losslabels[cnt])
+        # temp_x, temp_y = [], []
+        # for dot_i in range(10, 101, 10):
+        #     idx = find_closed_index(x, dot_i*1000)
+        #     temp_x.append(x[idx])
+        #     temp_y.append(loss_y[idx])
+        # plt.plot(temp_x, temp_y, lossStyle[cnt], mfc="none", label=losslabels[cnt])
+    else:
+        plt.plot(loss_y, lossStyle[cnt] , label=losslabels[cnt])
+    
     plt.grid(True)
     if flag:
         plt.gca().xaxis.set_major_formatter(FuncFormatter(to_seconds))
     plt.ylabel('Loss')
-    if flag:
-        plt.plot(x, loss_y, lossStyle[cnt] , label=losslabels[cnt])
-    else:
-        plt.plot(loss_y, lossStyle[cnt] , label=losslabels[cnt])
+    plt.title(title)
+    plt.xlabel(xlabel)
     plt.legend()
 
     plt.subplot(1,2,2)
-    plt.title(title)
-    plt.xlabel(xlabel)
+    if flag:
+        plt.plot(x, acc_y, lossStyle[cnt] , label=losslabels[cnt])
+        # temp_x, temp_y = [], []
+        # for dot_i in range(10, 101, 10):
+        #     idx = find_closed_index(x, dot_i*1000)
+        #     print(x[idx])
+        #     temp_x.append(x[idx])
+        #     temp_y.append(acc_y[idx])
+        # plt.plot(temp_x, temp_y, lossStyle[cnt], mfc="none", label=losslabels[cnt])
+    else:
+        plt.plot(acc_y, lossStyle[cnt] , label=losslabels[cnt])
+    
     plt.grid(True)
     if flag:
         plt.gca().xaxis.set_major_formatter(FuncFormatter(to_seconds))
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(to_percent))
+    plt.title(title)
+    plt.xlabel(xlabel)
     plt.ylabel('Accuracy')
-    if flag:
-        plt.plot(x, acc_y, lossStyle[cnt] , label=losslabels[cnt])
-    else:
-        plt.plot(acc_y, lossStyle[cnt] , label=losslabels[cnt])
     plt.legend()
 
 filenames = [
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200309/fed_100_noniid.txt',
-    '/Users/huangjiaming/Documents/developer/ETreeLearning/res/losses/20200313/etree_100_3_20_iid.txt'
+    '../losses/temp/fed_100_high.txt',
+    '../losses/temp/etree_100_high.txt'
 ]
 losslabels = ['FL', 'E-Tree', 'E-Tree Learning 30']
 acclabels = ['Federated Learning accuracy', 'ETree Learning accuracy']
-lossStyle = ['b-.', 'r-.', 'm-.', 'g-.']
+lossStyle = ['b-', 'r-', 'm-.', 'g-']
 accStyle = ['b-', 'r-', 'm-']
 cnt = 0
 
 plt.figure(figsize=(12, 4))
-
 for filepath in filenames:
     x = []
     loss_y = []
@@ -57,9 +78,9 @@ for filepath in filenames:
             x.append(int(a))
             loss_y.append(float(b))
             acc_y.append(float(c))
-        plot_save('100 nodes', 'Simulation time', cnt, True)
+        plot_save('100 nodes', 'Simulation time(s)', cnt, True)
     cnt += 1
 
-plt.savefig('./E1.png', dpi=300)
+plt.savefig('./E5.png', dpi=300)
 
 # Simulation time

@@ -26,9 +26,9 @@ public class ETreeRouting implements Transport {
     private final int max_load_per_link = 2;
 
     /*@hidden */
-    private int[][] graph; // Physical topology
-    private int[][][] minDelayMatrix;
-    private int layers;
+    private final int[][] graph; // Physical topology
+    private final int[][][] minDelayMatrix;
+    private final int layers;
     private boolean hasInit;
 
     private ArrayList<ArrayList<Integer>> layersNodeID;
@@ -88,7 +88,8 @@ public class ETreeRouting implements Transport {
      */
     private void shortestPath(int start, int layer, int[][] graph, int[][] load, boolean flag) {
         class Edge implements Comparable<Edge> {
-            int to, cost;
+            final int to;
+            final int cost;
 
             Edge(int to_, int cost_) {
                 to = to_;

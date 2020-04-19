@@ -8,7 +8,7 @@ m = int(argv[2])
 delayMean = int(argv[3])
 delayVar = int(argv[4])
 
-test_data = IO(file_prefix='../db/data'+str(n), data_id="")
+test_data = IO(file_prefix='../db/data_'+str(n)+'_'+str(m), data_id="")
 
 graph = Graph.UDAG(n, m, self_loop=False, repeated_edges=False)
 

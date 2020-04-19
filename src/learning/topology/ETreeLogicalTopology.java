@@ -79,12 +79,12 @@ public class ETreeLogicalTopology extends WireGraph {
                 // gets aggregate node
                 ETreeNode agg_node = (ETreeNode) Network.get(group.get( group.size()-1 ));
                 // update lastNodeIndexes
-                lastNodeIndexes.add((int)agg_node.getID());
+                lastNodeIndexes.add(agg_node.getIndex());
 
                 for (int i = 0; i < group.size()-1; i++) {
                     ETreeNode node = (ETreeNode) Network.get(group.get(i));
-                    node.addParentNode((int) agg_node.getID());
-                    agg_node.addChildNode(layer+1, (int) node.getID());
+                    node.addParentNode(agg_node.getIndex());
+                    agg_node.addChildNode(layer+1, node.getIndex());
                 }
             }
         }
@@ -92,7 +92,7 @@ public class ETreeLogicalTopology extends WireGraph {
         ETreeLearningProtocol.setLayersNodeID(layersNodeID);
         StartETreeMessageInitializer.setLayersNodeID(layersNodeID);
 
-        /* ---------- debug output -------------
+        /* ---------- debug output -------------*/
         for (ArrayList<Integer> temp : layersNodeID) {
             System.out.print("size " + (temp.size()) + ": ");
             for (Integer id : temp) {
@@ -100,7 +100,7 @@ public class ETreeLogicalTopology extends WireGraph {
             }
             System.out.println();
         }
-
+        /*
         // output node
         for (int layer = 0; layer < layers; layer++) {
             System.out.println("Layer: " + layer);

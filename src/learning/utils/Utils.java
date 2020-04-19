@@ -340,10 +340,10 @@ public class Utils {
     }
 
     Integer result[] = new Integer[n];
-    Random rd = new Random();
+
     int index;
     for (int i = 0; i < n; i++) {
-      index = rd.nextInt(len-i);
+      index = CommonState.r.nextInt(len-i);
       result[i] = source[index];
 
       int temp = source[index];
