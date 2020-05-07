@@ -247,6 +247,185 @@ public class TopoUtil {
 		return avgLosses;
 	}
     
+    // clustering only accounting the uniform class distribution
+    public static ArrayList<ArrayList<Integer>> getUniformDistributionGraphPartition(
+    		int[][] graph, ArrayList<Integer> nodeIdList, int k) {
+    	
+    	int[][] minDelayMatrix = generateMinDelayMatrix(graph);
+//    	ArrayList<Double> differences = new ArrayList<Double>();
+    	
+    	// 初始化包含三个列表的分组列表，每个列表的大小为待分组的节点数
+    	// initiate a ArrayList including k ArrayLists,
+        // where each ArrayList's size is the number of nodes to be clustered.
+        ArrayList<ArrayList<Integer>> clusterList = new ArrayList<>(3);
+        for (int i = 0; i < k; i++) {
+            ArrayList<Integer> cluster = new ArrayList<>(nodeIdList.size());
+            clusterList.add(cluster);
+        }
+        
+        // clustering based on class distribution
+        ArrayList<Integer> classEndNodeId = new ArrayList<Integer>();
+        for (int i = 0; i < classDistribution.size(); i++) {
+        	if (classDistribution.get(i).size() > 1) {
+        		classEndNodeId.add(i);
+        	} else if (i > 0 && !classDistribution.get(i).equals(classDistribution.get(i - 1))) {
+        		if (classDistribution.get(i - 1).size() == 1) {
+        			classEndNodeId.add(i - 1);
+        		}
+        	}
+        }
+        classEndNodeId.add(classDistribution.size() - 1);
+        
+        for (int i = 0; i < classEndNodeId.size(); i++) {
+        	int beginNode = (i == 0) ? 0 : (classEndNodeId.get(i - 1) + 1);
+        	int numOfNodes = classEndNodeId.get(i) - beginNode + 1;
+            int nodePerGroup = numOfNodes / k;
+            int left = numOfNodes % k;
+            
+            int ind = beginNode;
+            for (int j = 0; j < k; j++) {
+            	for (int m = 0; m < nodePerGroup; m++) {
+            		clusterList.get(j).add(ind);
+            		ind++;
+            	}
+            }
+            
+            if (left > 0) {
+            	for (int j = 0; j < left; j++) {
+            		clusterList.get(j).add(ind);
+            		ind++;
+            	}
+            }
+        }
+        
+        double[] avgLosses = computeAvgLosses(clusterList);
+        double avgDifferences = 0.0;
+        for (int i = 0; i < clusterList.size(); i++) {
+        	double diff = avgLosses[i] - globalAvgAcc;
+        	diff = Math.abs(diff);
+        	avgDifferences += diff;
+        }
+        avgDifferences = avgDifferences / clusterList.size();
+        System.out.println(avgDifferences);
+        
+        for (int i = 0; i < k; i++) {
+            clusterList.get(i).add(clusterList.get(i).get(0));
+        }
+        return clusterList;
+	}
+    
+    // clustering only accounting the uniform kma
+    public static ArrayList<ArrayList<Integer>> getUniformGraphPartition(
+    		int[][] graph, ArrayList<Integer> nodeIdList, int k) {
+    	
+    	int[][] minDelayMatrix = generateMinDelayMatrix(graph);
+//    	ArrayList<Double> differences = new ArrayList<Double>();
+    	
+    	// 初始化包含三个列表的分组列表，每个列表的大小为待分组的节点数
+    	// initiate a ArrayList including k ArrayLists,
+        // where each ArrayList's size is the number of nodes to be clustered.
+        ArrayList<ArrayList<Integer>> clusterList = new ArrayList<>(3);
+        for (int i = 0; i < k; i++) {
+            ArrayList<Integer> cluster = new ArrayList<>(nodeIdList.size());
+            clusterList.add(cluster);
+        }
+        
+        // record current k center nodes.
+        int[] clusterCenterNodeId = new int[k];
+        
+        // temp array to save the existing center nodes.
+        HashSet<Integer> hashSet = new HashSet<>();
+        
+        // the result k center nodes.
+        int[] finalClusterCenterId = new int[k];
+
+        // randomly choose k center nodes.
+        for (int i = 0; i < k; i++) {
+            int randomNodeIndex = CommonState.r.nextInt(nodeIdList.size());
+            while (hashSet.contains(randomNodeIndex)) {
+                randomNodeIndex = CommonState.r.nextInt(nodeIdList.size());
+            }
+            hashSet.add(randomNodeIndex);
+            clusterCenterNodeId[i] = nodeIdList.get(randomNodeIndex);
+        }
+        
+        boolean terminateFlag = false;
+        int iteration = 0;
+        while (!terminateFlag && iteration < iterations) {
+            terminateFlag = true;
+            
+            // clear the previous result.
+            for (int i = 0; i < k; i++) {
+                clusterList.get(i).clear();
+            }
+            
+            // put every node to the group with proper accuracy
+            double[] currentAvgAccuracies = new double[k];
+            for (int i = 0; i < k; i++) {
+            	currentAvgAccuracies[i] = accuracies[clusterCenterNodeId[i]];
+            	clusterList.get(i).add(clusterCenterNodeId[i]);
+            }
+            for (int i = 0; i < nodeIdList.size(); i++) {
+            	int currentNodeId = nodeIdList.get(i);
+            	if (inArray(currentNodeId, clusterCenterNodeId)) {
+            		continue;
+            	}
+            	
+            	// find the cluster whose average accuracy is the most appropriate.
+            	double accOfCurrentNode = accuracies[currentNodeId];
+            	boolean added = false;
+            	int smallest = 0;
+            	double smallestDifference = 1.0;
+            	for (int j = 0; j < k; j++) {
+            		double avgAcc = currentAvgAccuracies[j];
+            		int currentSize = clusterList.get(j).size();
+            		double newAvg = (avgAcc*currentSize + accOfCurrentNode) / (currentSize + 1);
+            	    double difference = newAvg - globalAvgAcc;
+            	    difference = Math.abs(difference);
+//            	    differences.add(difference);
+            	    if (difference < smallestDifference) {
+            	    	smallest = j;
+            	    	smallestDifference = difference;
+            	    }
+            	}
+            	clusterList.get(smallest).add(currentNodeId);
+                
+            }
+            
+            // compute new centerNodeId, 
+            // choose the node that the total delay between it
+            // and the other nodes in the cluster is the smallest.
+            for (int i = 0; i < k; i++) {
+            	
+            	int newCenterNodeId = findCenterId(clusterList.get(i), minDelayMatrix);
+                
+                // not end until the center ids of all clusters don't change.
+                if (newCenterNodeId != clusterCenterNodeId[i]) {
+                    terminateFlag = false;
+                    clusterCenterNodeId[i] = newCenterNodeId;
+                }
+            }
+            
+            finalClusterCenterId = clusterCenterNodeId;
+            iteration++;
+        }
+        
+        double[] avgLosses = computeAvgLosses(clusterList);
+        double avgDifferences = 0.0;
+        for (int i = 0; i < clusterList.size(); i++) {
+        	double diff = avgLosses[i] - globalAvgAcc;
+        	diff = Math.abs(diff);
+        	avgDifferences += diff;
+        }
+        avgDifferences = avgDifferences / clusterList.size();
+        System.out.println(avgDifferences);
+        
+        for (int i = 0; i < finalClusterCenterId.length; i++) {
+            clusterList.get(i).add(finalClusterCenterId[i]);
+        }
+        return clusterList;
+	}
+    
     // clustering only accounting the ununiform data distribution
     public static ArrayList<ArrayList<Integer>> getUnuniformGraphPartition(
     		int[][] graph, ArrayList<Integer> nodeIdList, int k) {
@@ -262,24 +441,64 @@ public class TopoUtil {
         	nodeIds[i] = nodeIdList.get(i);
         }
         Arrays.sort(nodeIds);
-        int numOfNodePerCluster = nodeIdList.size() / k;
-        int left = nodeIdList.size() % k;
-        int nodeIndex = 0;
-        
-        for (int i = 0; i < k; i++) {
-        	int numOfNodes = numOfNodePerCluster;
-        	if (i < left) {
-        		numOfNodes++;
+        if (nodeIdList.size() <= 100) {
+	        int numOfNodePerCluster = nodeIdList.size() / k;
+	        int left = nodeIdList.size() % k;
+	        int nodeIndex = 0;
+	        
+	        for (int i = 0; i < k; i++) {
+	        	int numOfNodes = numOfNodePerCluster;
+	        	if (i < left) {
+	        		numOfNodes++;
+	        	}
+	        	int temp = nodeIndex;
+	        	nodeIndex += numOfNodes;
+	        	for (int j = temp; j < nodeIndex; j++) {
+	        		clusterList.get(i).add(nodeIds[j]);
+	        	}
+	        }
+        } else {
+        	int rounds = nodeIdList.size() / 100;
+        	if ((nodeIdList.size() % 100) != 0) {
+        		rounds++;
         	}
-        	int temp = nodeIndex;
-        	nodeIndex += numOfNodes;
-        	for (int j = temp; j < nodeIndex; j++) {
-        		clusterList.get(i).add(nodeIds[j]);
+    		int nodeIndex = 0;
+        	boolean end = false;
+    		
+        	for (int i = 0; i < rounds; i++) {
+	    		int numOfNodePerCluster = 100 / k;
+	    		int left = 100 % k;
+        		for (int j = 0; j < k; j++) {
+        			int numOfNodes = numOfNodePerCluster;
+        			if (j < left) {
+        				numOfNodes++;
+        			}
+        			int temp = nodeIndex;
+        			nodeIndex += numOfNodes;
+        			if (nodeIndex > nodeIds.length) {
+        				nodeIndex = nodeIds.length;
+        				end = true;
+        			}
+        			for (int m = temp; m < nodeIndex; m++) {
+        				clusterList.get(j).add(nodeIds[m]);
+        			}
+        		}
+        		if (end) {
+        			break;
+        		}
         	}
         }
         
+        
         double[] avgLosses = computeAvgLosses(clusterList);
-        System.out.println(avgLosses);
+        double avgDifferences = 0.0;
+        for (int i = 0; i < clusterList.size(); i++) {
+        	double diff = avgLosses[i] - globalAvgAcc;
+        	diff = Math.abs(diff);
+        	avgDifferences += diff;
+        }
+        avgDifferences = avgDifferences / clusterList.size();
+        System.out.println(avgDifferences);
         
         for (int i = 0; i < k; i++) {
         	int centerId = findCenterId(clusterList.get(i), minDelayMatrix);
@@ -386,8 +605,6 @@ public class TopoUtil {
             	    	clusterList.get(originalIndex).add(currentNodeId);
             	    	currentAvgAccuracies[originalIndex] = newAvg;
             	    	break;
-            	    } else {
-            	    	System.out.println();
             	    }
             	}
             	// if no cluster fits the request, add the current node to the nearest cluster.
@@ -421,7 +638,14 @@ public class TopoUtil {
         }
         
         double[] avgLosses = computeAvgLosses(clusterList);
-        System.out.println(avgLosses);
+        double avgDifferences = 0.0;
+        for (int i = 0; i < clusterList.size(); i++) {
+        	double diff = avgLosses[i] - globalAvgAcc;
+        	diff = Math.abs(diff);
+        	avgDifferences += diff;
+        }
+        avgDifferences = avgDifferences / clusterList.size();
+        System.out.println(avgDifferences);
         
         for (int i = 0; i < finalClusterCenterId.length; i++) {
             clusterList.get(i).add(finalClusterCenterId[i]);
@@ -492,7 +716,14 @@ public class TopoUtil {
         }
         
         double[] avgLosses = computeAvgLosses(clusterList);
-        System.out.println(avgLosses);
+        double avgDifferences = 0.0;
+        for (int i = 0; i < clusterList.size(); i++) {
+        	double diff = avgLosses[i] - globalAvgAcc;
+        	diff = Math.abs(diff);
+        	avgDifferences += diff;
+        }
+        avgDifferences = avgDifferences / clusterList.size();
+        System.out.println(avgDifferences);
         
         for (int i = 0; i < finalClusterCenterId.length; i++) {
             // System.out.println(finalClusterCenterId[i]);
