@@ -75,7 +75,7 @@ public class ETreeLogicalTopology extends WireGraph {
         ArrayList<ArrayList<Integer>> layersNodeID = new ArrayList<>();
 
         // gets the grouping result int the 0st layer
-        ArrayList<ArrayList<Integer>> res;
+        ArrayList<ArrayList<Integer>> res = new ArrayList<ArrayList<Integer>>();
         for (int layer = 0; layer < layers; layer++) {
             layersNodeID.add(new ArrayList<>(lastNodeIndexes));
             
@@ -130,7 +130,12 @@ public class ETreeLogicalTopology extends WireGraph {
 				case 4:
 					// only consider uniform class distribution
 		            if (groups[layer] > 1) {
-		            	res = TopoUtil.getUniformDistributionGraphPartition(graph, lastNodeIndexes, groups[layer]);
+		            	try {
+							res = TopoUtil.getUniformDistributionGraphPartition(graph, lastNodeIndexes, groups[layer]);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 		            } else {
 		            	res = new ArrayList<ArrayList<Integer>>();
 		            	int[][] minDelayMatrix = TopoUtil.generateMinDelayMatrix(graph);

@@ -249,21 +249,40 @@ public class TopoUtil {
     
     // clustering only accounting the uniform class distribution
     public static ArrayList<ArrayList<Integer>> getUniformDistributionGraphPartition(
-    		int[][] graph, ArrayList<Integer> nodeIdList, int k) {
+    		int[][] graph, ArrayList<Integer> nodeIdList, int k) throws Exception {
     	
     	int[][] minDelayMatrix = generateMinDelayMatrix(graph);
 //    	ArrayList<Double> differences = new ArrayList<Double>();
     	
-    	// 初始化包含三个列表的分组列表，每个列表的大小为待分组的节点数
-    	// initiate a ArrayList including k ArrayLists,
-        // where each ArrayList's size is the number of nodes to be clustered.
         ArrayList<ArrayList<Integer>> clusterList = new ArrayList<>(3);
         for (int i = 0; i < k; i++) {
             ArrayList<Integer> cluster = new ArrayList<>(nodeIdList.size());
             clusterList.add(cluster);
         }
         
-        // clustering based on class distribution
+    	int classPerCluster = Configuration.getInt("clustering.classesPerCluster");
+    	int numOfClasses = Configuration.getInt("numOfClasses");
+    	if (classPerCluster > numOfClasses) {
+    		throw new Exception("Classes per cluster is larger than the number of classes.");
+    	}
+    	
+    	// find out each class's nodes should be assigned to which clusters
+    	ArrayList<ArrayList<Integer>> clustersPerClass = new ArrayList<ArrayList<Integer>>();
+    	for (int i = 0; i < numOfClasses; i++) {
+    		clustersPerClass.add(new ArrayList<Integer>());
+    	}
+    	int classIndex = 0;
+    	for (int i = 0; i < k; i++) {
+    		for (int j = 0; j < classPerCluster; j++) {
+    			clustersPerClass.get(classIndex).add(i);
+    			classIndex++;
+    			if (classIndex == 6) {
+    				classIndex = 0;
+    			}
+    		}
+    	}
+    	
+    	// find out the final node index of each class
         ArrayList<Integer> classEndNodeId = new ArrayList<Integer>();
         for (int i = 0; i < classDistribution.size(); i++) {
         	if (classDistribution.get(i).size() > 1) {
@@ -275,24 +294,27 @@ public class TopoUtil {
         	}
         }
         classEndNodeId.add(classDistribution.size() - 1);
-        
-        for (int i = 0; i < classEndNodeId.size(); i++) {
+    	
+    	// for each class, evenly assign the nodes to the corresponding clusters
+    	for (int i = 0; i < numOfClasses; i++) {
         	int beginNode = (i == 0) ? 0 : (classEndNodeId.get(i - 1) + 1);
         	int numOfNodes = classEndNodeId.get(i) - beginNode + 1;
-            int nodePerGroup = numOfNodes / k;
-            int left = numOfNodes % k;
+        	int numOfClustersToAssign = clustersPerClass.get(i).size();
+        	
+            int nodePerGroup = numOfNodes / numOfClustersToAssign;
+            int left = numOfNodes % numOfClustersToAssign;
             
             int ind = beginNode;
-            for (int j = 0; j < k; j++) {
+            for (int j = 0; j < numOfClustersToAssign; j++) {
             	for (int m = 0; m < nodePerGroup; m++) {
-            		clusterList.get(j).add(ind);
+            		clusterList.get(clustersPerClass.get(i).get(j)).add(ind);
             		ind++;
             	}
             }
             
             if (left > 0) {
             	for (int j = 0; j < left; j++) {
-            		clusterList.get(j).add(ind);
+            		clusterList.get(clustersPerClass.get(i).get(j)).add(ind);
             		ind++;
             	}
             }
