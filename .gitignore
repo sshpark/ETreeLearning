@@ -1,0 +1,8 @@
+reports
+res/losses
+out
+.idea
+.classpath
+*.class
+*.png
+*.dat

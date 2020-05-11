@@ -51,10 +51,10 @@ protocol.learningProtocol.deltaF DELTAF
 protocol.learningProtocol.modelHolderName learning.modelHolders.BoundedModelHolder
 protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.recvPercent RECV_PERCENT
-protocol.learningProtocol.trainingFile res/db/synthetic_train.dat
-protocol.learningProtocol.evaluationFile res/db/synthetic_eval.dat
-protocol.learningProtocol.modelName learning.models.SoftmaxRegression
-protocol.learningProtocol.SoftmaxRegression.lambda 0.02
+protocol.learningProtocol.trainingFile res/db/spambase_train.dat
+protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
+protocol.learningProtocol.modelName learning.models.LogisticRegression
+protocol.learningProtocol.LogisticRegression.lambda 0.02
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.FedLogicalTopology
@@ -64,11 +64,11 @@ init.overlayInit.recvPercent RECV_PERCENT
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
 init.overlayStart.protocolID overlay
 
-init.instanceLoader learning.controls.initializers.InstanceLoadFromSynthetic
+init.instanceLoader learning.controls.initializers.InstanceLoader
 init.instanceLoader.protocol learningProtocol
-init.instanceLoader.trainingFile res/db/synthetic_train.dat
-init.instanceLoader.evaluationFile res/db/synthetic_eval.dat
-init.instanceLoader.numSamplesFile res/db/synthetic_samples.dat
+init.instanceLoader.trainingFile res/db/spambase_train.dat
+init.instanceLoader.evaluationFile res/db/spambase_eval.dat
+init.instanceLoader.samplesPerNode 73
 
 
 init.setParameterForModels learning.controls.initializers.SetParameterForModels
@@ -88,7 +88,7 @@ include.init overlayInit overlayStart instanceLoader setParameterForModels setMi
 
 #-------------------- Observers --------------------
 #control.prediction learning.controls.observers.FedLossObserver
-#control.prediction.errorComputatorClass learning.controls.observers.errorComputation.VotedErrorComputator
+#control.prediction.errorComputatorClass #learning.controls.observers.errorComputation.VotedErrorComputator
 #control.prediction.errorFunctionClass learning.controls.observers.errorComputation.ZeroOneError
 #control.prediction.step LOGTIME
 #control.prediction.protocol learningProtocol
