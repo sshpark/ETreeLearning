@@ -53,8 +53,8 @@ protocol.learningProtocol.capacity CAPACITY
 protocol.learningProtocol.recvPercent RECV_PERCENT
 protocol.learningProtocol.trainingFile res/db/spambase_train.dat
 protocol.learningProtocol.evaluationFile res/db/spambase_eval.dat
-protocol.learningProtocol.modelName learning.models.LogisticRegression
-protocol.learningProtocol.LogisticRegression.lambda 0.02
+protocol.learningProtocol.modelName learning.models.MergeableLogisticRegression
+protocol.learningProtocol.MergeableLogisticRegression.lambda 0.02
 
 #-------------------- Initializers --------------------
 init.overlayInit learning.topology.FedLogicalTopology
