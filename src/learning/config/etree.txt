@@ -1,6 +1,6 @@
 NETWORKSIZE 100
 ONLINESIZE NETWORKSIZE
-OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/20200507/etree_100_5_5_noniid_har_uniformdistribution.txt
+OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/20200507/uniformDistribution/etree_100_5_8_noniid_har_uniformdistribution_1.txt
 DELAY_OUTPUT_FILEPATH C:/koori/learning/javaprojects/ETreeLearning/res/losses/delay_etree.txt
 
 # Network topology parameters
@@ -9,6 +9,11 @@ LAYERS 3
 
 # clustering algorithm, 0-km, 1-kma, 2-ununiformkma, 3-uniformkma, 4-uniform distribution
 clustering.mode 4
+
+# parameter for uniform distribution
+# classes per cluster
+clustering.classesPerCluster 1
+numOfClasses 6
 
 LOGTIME 2000
 SEED 1234567890
@@ -73,7 +78,7 @@ protocol.learningProtocol.SoftmaxRegression.lambda 0.02
 init.overlayInit learning.topology.ETreeLogicalTopology
 init.overlayInit.layers LAYERS
 init.overlayInit.recvPercent RECV_PERCENT
-init.overlayInit.groups 5,1,1
+init.overlayInit.groups 8,1,1
 init.overlayInit.protocol overlay
 
 init.overlayStart peersim.extras.mj.ednewscast.EventInitializer
